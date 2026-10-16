@@ -3,23 +3,61 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
     /**
-     * Seed the application's database.
+     * Cria um usuário de demonstração com três meses de movimentações.
+     * Login: demo@finance.test / demo12345
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $user = User::create([
+            'name' => 'Usuário Demo',
+            'email' => 'demo@finance.test',
+            'password' => 'demo12345', // o cast "hashed" do model cuida do hash
         ]);
+
+        $categories = [];
+        foreach ([
+            ['Salário', 'income'],
+            ['Freelance', 'income'],
+            ['Alimentação', 'expense'],
+            ['Moradia', 'expense'],
+            ['Transporte', 'expense'],
+            ['Lazer', 'expense'],
+        ] as [$name, $type]) {
+            $categories[$name] = $user->categories()->create(['name' => $name, 'type' => $type]);
+        }
+
+        // Mês atual e os dois anteriores.
+        foreach ([0, 1, 2] as $monthsAgo) {
+            $month = now()->startOfMonth()->subMonthsNoOverflow($monthsAgo);
+
+            $entries = [
+                ['Salário', 'Salário do mês', 4500.00, 5],
+                ['Moradia', 'Aluguel', 1200.00, 10],
+                ['Alimentação', 'Supermercado', 450.75 + $monthsAgo * 20, 8],
+                ['Alimentação', 'Feira e padaria', 120.30, 14],
+                ['Alimentação', 'Restaurante', 85.90 + $monthsAgo * 15, 21],
+                ['Transporte', 'Combustível', 210.00, 12],
+                ['Lazer', 'Cinema e jantar', 95.90 + $monthsAgo * 10, 18],
+            ];
+
+            if ($monthsAgo !== 1) {
+                $entries[] = ['Freelance', 'Projeto de site', 800.00, 15];
+            }
+
+            foreach ($entries as [$category, $description, $amount, $day]) {
+                $user->transactions()->create([
+                    'category_id' => $categories[$category]->id,
+                    'description' => $description,
+                    'amount' => $amount,
+                    'type' => $categories[$category]->type,
+                    'date' => $month->copy()->day($day)->toDateString(),
+                ]);
+            }
+        }
     }
 }
