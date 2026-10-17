@@ -2,7 +2,17 @@
 
 [![Tests](https://github.com/Netero-mac/finance-api/actions/workflows/ci.yml/badge.svg)](https://github.com/Netero-mac/finance-api/actions/workflows/ci.yml)
 
-API REST de controle financeiro pessoal feita com **Laravel**. Cada usuário cadastra suas categorias e transações (receitas e despesas), filtra por período e consulta um resumo mensal com saldo.
+API REST de controle financeiro pessoal feita com **Laravel**, com uma interface web simples para usá-la. Cada usuário cadastra suas categorias e transações (receitas e despesas), filtra por período e consulta um resumo mensal com saldo.
+
+## Demonstração
+
+**https://finance-api-o6mw.onrender.com**
+
+Usuário de teste: `demo@finance.test` · senha: `demo12345`
+
+A demonstração roda no plano gratuito da Render: se ficar um tempo sem acessos, o primeiro carregamento pode levar cerca de 1 minuto. Os dados de exemplo são recriados a cada reinício do servidor.
+
+![Painel do Finance](docs/painel.png)
 
 ## Funcionalidades
 
@@ -11,18 +21,20 @@ API REST de controle financeiro pessoal feita com **Laravel**. Cada usuário cad
 - CRUD de transações com filtros por período, categoria e tipo, e paginação
 - Resumo mensal: total de receitas, despesas, saldo e total por categoria
 - Isolamento de dados: cada usuário só acessa os próprios registros (Policies)
+- Interface web em um único arquivo HTML (`public/app.html`), sem dependências externas
 - Testes automatizados rodando a cada push (GitHub Actions)
+- Deploy com Docker na Render
 
 ## Tecnologias
 
-PHP 8.3 · Laravel · Laravel Sanctum · MySQL ou SQLite · PHPUnit · GitHub Actions
+PHP 8.3 · Laravel · Laravel Sanctum · SQLite ou MySQL · PHPUnit · Docker · GitHub Actions · HTML, CSS e JavaScript puro
 
 ## Como rodar
 
-Requisitos: PHP 8.2 ou superior, Composer e um banco (SQLite ou MySQL).
+Requisitos: PHP 8.3 ou superior, Composer e um banco (SQLite ou MySQL).
 
 ```bash
-git clone git@github.com:Netero-mac/finance-api.git
+git clone https://github.com/Netero-mac/finance-api.git
 cd finance-api
 
 composer install
@@ -41,14 +53,16 @@ DB_USERNAME=seu_usuario
 DB_PASSWORD=sua_senha
 ```
 
-Depois:
+Crie as tabelas, os dados de exemplo e suba o servidor:
 
 ```bash
-php artisan migrate
+php artisan migrate --seed
 php artisan serve
 ```
 
-A API fica em `http://127.0.0.1:8000/api`.
+- Interface web: `http://127.0.0.1:8000`
+- API: `http://127.0.0.1:8000/api`
+- Usuário de exemplo criado pelo seed: `demo@finance.test` / `demo12345`
 
 ## Testes
 
@@ -97,12 +111,12 @@ Accept: application/json
 
 ## Exemplos
 
-**Registrar**
+**Login**
 
 ```bash
-curl -X POST http://127.0.0.1:8000/api/register \
+curl -X POST https://finance-api-o6mw.onrender.com/api/login \
   -H "Accept: application/json" -H "Content-Type: application/json" \
-  -d '{"name":"Ana","email":"ana@example.com","password":"senha12345"}'
+  -d '{"email":"demo@finance.test","password":"demo12345"}'
 ```
 
 **Criar categoria**
@@ -151,12 +165,12 @@ curl "http://127.0.0.1:8000/api/summary?month=2026-10" \
 ```json
 {
   "month": "2026-10",
-  "income": "1000.00",
-  "expense": "300.00",
-  "balance": "700.00",
+  "income": "3000.00",
+  "expense": "483.25",
+  "balance": "2516.75",
   "by_category": [
-    {"category_id": 2, "category": "Salário", "type": "income", "total": "1000.00"},
-    {"category_id": 1, "category": "Alimentação", "type": "expense", "total": "300.00"}
+    {"category_id": 1, "category": "Salário", "type": "income", "total": "3000.00"},
+    {"category_id": 2, "category": "Alimentação", "type": "expense", "total": "483.25"}
   ]
 }
 ```
@@ -179,6 +193,8 @@ curl "http://127.0.0.1:8000/api/summary?month=2026-10" \
 - Valores monetários usam `decimal(10,2)`, e o resumo soma em centavos (inteiros) para evitar erros de arredondamento.
 - `user_id` não é preenchido pela requisição: sempre vem do usuário autenticado.
 - O resumo usa consultas agregadas (`SUM` com `GROUP BY`) em vez de somar em PHP.
+- A interface é um único HTML servido pelo próprio Laravel, no mesmo endereço da API, o que dispensa configuração de CORS.
+- O token fica no `localStorage` do navegador, o que é suficiente para este projeto. Em produção, o ideal seria um cookie `HttpOnly`.
 
 ## Estrutura
 
@@ -191,7 +207,10 @@ app/
 │   └── Resources/         formato das respostas
 ├── Models/                User, Category, Transaction
 └── Policies/              regras de acesso
+database/seeders/          dados de demonstração
+public/app.html            interface web
 tests/Feature/             Auth, Category, Transaction, Summary
+Dockerfile                 imagem usada no deploy
 ```
 
 ## Autor
