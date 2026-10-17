@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Finance | Controle financeiro</title>
+<style>
+  :root {
+    --bg: #f5f6f8; --card: #ffffff; --text: #1c2430; --muted: #6b7686;
+    --border: #e3e7ee; --primary: #2f6fed; --primary-text: #ffffff;
+    --income: #168a52; --expense: #d4402f; --radius: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #10141b; --card: #181e28; --text: #e8ecf3; --muted: #98a3b5;
+      --border: #2a3342; --primary: #6c9bff; --primary-text: #0d1117;
+      --income: #3ecf8e; --expense: #ff7a6b;
+    }
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; line-height: 1.45;
+  }
+  h1, h2, h3 { margin: 0; }
+  .container { max-width: 980px; margin: 0 auto; padding: 20px 16px 48px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; }
+  .muted { color: var(--muted); font-size: .9rem; }
+
+  /* formulários e botões */
+  label { display: block; font-size: .85rem; font-weight: 600; margin: 12px 0 4px; }
+  input, select {
+    width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--bg); color: var(--text); font: inherit;
+  }
+  input:focus, select:focus, button:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+  button { font: inherit; cursor: pointer; border-radius: 8px; border: 1px solid var(--border); padding: 9px 14px; background: var(--card); color: var(--text); }
+  button.primary { background: var(--primary); color: var(--primary-text); border-color: var(--primary); font-weight: 600; }
+  button.link { border: none; background: none; color: var(--primary); padding: 0; }
+  button.danger { color: var(--expense); }
+  button:disabled { opacity: .5; cursor: default; }
+  .error { color: var(--expense); font-size: .9rem; margin-top: 10px; min-height: 1.2em; }
+
+  /* login */
+  #auth-view { min-height: 100vh; display: grid; place-items: center; padding: 16px; }
+  #auth-view .card { width: min(380px, 100%); }
+  .tabs { display: flex; gap: 6px; margin: 14px 0 4px; }
+  .tabs button { flex: 1; }
+  .tabs button.active { background: var(--primary); color: var(--primary-text); border-color: var(--primary); }
+  #auth-submit { width: 100%; margin-top: 14px; }
+
+  /* topo */
+  header.top { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+  header.top .right { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  header.top input[type=month] { width: auto; }
+
+  /* resumo */
+  .summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+  .summary .value { font-size: 1.6rem; font-weight: 700; margin-top: 4px; }
+  .income { color: var(--income); } .expense { color: var(--expense); }
+
+  .grid { display: grid; gap: 16px; }
+  @media (min-width: 860px) { .grid { grid-template-columns: 1fr 1.7fr; align-items: start; } }
+  @media (max-width: 640px) { .summary { grid-template-columns: 1fr; } }
+
+  .panel-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+
+  /* categorias */
+  .cat-item { margin-bottom: 14px; }
+  .cat-line { display: flex; justify-content: space-between; font-size: .92rem; gap: 8px; }
+  .bar { height: 8px; border-radius: 99px; background: var(--border); overflow: hidden; margin-top: 5px; }
+  .bar > span { display: block; height: 100%; border-radius: 99px; }
+  .bar .income-bg { background: var(--income); } .bar .expense-bg { background: var(--expense); }
+
+  /* transações */
+  .filters { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+  .filters select { width: auto; flex: 1; min-width: 120px; }
+  .tx { display: flex; align-items: center; gap: 10px; padding: 11px 0; border-top: 1px solid var(--border); }
+  .tx:first-of-type { border-top: none; }
+  .tx .info { flex: 1; min-width: 0; }
+  .tx .desc { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tx .amount { font-weight: 700; white-space: nowrap; }
+  .tx button { padding: 4px 9px; font-size: .85rem; }
+  .pager { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; }
+  .empty { text-align: center; padding: 24px 8px; color: var(--muted); }
+
+  /* diálogos */
+  dialog { border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); color: var(--text); padding: 20px; width: min(420px, 92vw); }
+  dialog::backdrop { background: rgba(0, 0, 0, .45); }
+  .row { display: flex; gap: 8px; } .row > * { flex: 1; }
+  .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+  .type-switch label { display: flex; align-items: center; gap: 6px; font-weight: 500; margin: 0; padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; }
+  .type-switch input { width: auto; }
+</style>
+</head>
+<body>
+
+<!-- Tela de login e cadastro -->
+<div id="auth-view" hidden>
+  <div class="card">
+    <h1>Finance</h1>
+    <p class="muted">Controle financeiro pessoal</p>
+    <div class="tabs">
+      <button type="button" id="tab-login" class="active">Entrar</button>
+      <button type="button" id="tab-register">Criar conta</button>
+    </div>
+    <form id="auth-form">
+      <div id="name-field" hidden>
+        <label for="auth-name">Nome</label>
+        <input id="auth-name" autocomplete="name">
+      </div>
+      <label for="auth-email">E-mail</label>
+      <input id="auth-email" type="email" required autocomplete="email">
+      <label for="auth-password">Senha</label>
+      <input id="auth-password" type="password" required minlength="8" autocomplete="current-password">
+      <div class="error" id="auth-error" role="alert"></div>
+      <button class="primary" id="auth-submit" type="submit">Entrar</button>
+    </form>
+  </div>
+</div>
+
+<!-- Aplicativo -->
+<div id="app-view" hidden>
+  <div class="container">
+    <header class="top">
+      <div>
+        <h1>Finance</h1>
+        <div class="muted">Olá, <span id="user-name"></span></div>
+      </div>
+      <div class="right">
+        <input type="month" id="month" aria-label="Mês">
+        <button class="primary" type="button" id="btn-new-tx">+ Nova transação</button>
+        <button type="button" id="btn-logout">Sair</button>
+      </div>
+    </header>
+
+    <section class="summary">
+      <div class="card"><div class="muted">Receitas</div><div class="value income" id="sum-income">R$ 0,00</div></div>
+      <div class="card"><div class="muted">Despesas</div><div class="value expense" id="sum-expense">R$ 0,00</div></div>
+      <div class="card"><div class="muted">Saldo</div><div class="value" id="sum-balance">R$ 0,00</div></div>
+    </section>
+
+    <div class="grid">
+      <section class="card">
+        <div class="panel-head">
+          <h2>Por categoria</h2>
+          <button class="link" type="button" id="btn-new-cat">+ Nova categoria</button>
+        </div>
+        <div id="by-category"></div>
+      </section>
+
+      <section class="card">
+        <div class="panel-head"><h2>Transações</h2><span class="muted" id="tx-total"></span></div>
+        <div class="filters">
+          <select id="filter-type" aria-label="Filtrar por tipo">
+            <option value="">Todos os tipos</option>
+            <option value="income">Receitas</option>
+            <option value="expense">Despesas</option>
+          </select>
+          <select id="filter-category" aria-label="Filtrar por categoria"></select>
+        </div>
+        <div id="tx-list"></div>
+        <div class="pager">
+          <button type="button" id="prev">&larr; Anterior</button>
+          <span class="muted" id="page-info"></span>
+          <button type="button" id="next">Próxima &rarr;</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- Diálogo: nova transação -->
+<dialog id="tx-dialog">
+  <form id="tx-form">
+    <h2>Nova transação</h2>
+    <label>Tipo</label>
+    <div class="row type-switch">
+      <label><input type="radio" name="tx-type" value="expense" checked> Despesa</label>
+      <label><input type="radio" name="tx-type" value="income"> Receita</label>
+    </div>
+    <label for="tx-category">Categoria</label>
+    <select id="tx-category" required></select>
+    <div class="muted" id="tx-cat-hint" hidden>Crie uma categoria deste tipo primeiro.</div>
+    <label for="tx-desc">Descrição</label>
+    <input id="tx-desc" required maxlength="255">
+    <div class="row">
+      <div><label for="tx-amount">Valor (R$)</label><input id="tx-amount" type="number" step="0.01" min="0.01" required></div>
+      <div><label for="tx-date">Data</label><input id="tx-date" type="date" required></div>
+    </div>
+    <div class="error" id="tx-error" role="alert"></div>
+    <div class="dialog-actions">
+      <button type="button" data-close>Cancelar</button>
+      <button class="primary" type="submit">Salvar</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Diálogo: nova categoria -->
+<dialog id="cat-dialog">
+  <form id="cat-form">
+    <h2>Nova categoria</h2>
+    <label for="cat-name">Nome</label>
+    <input id="cat-name" required maxlength="100">
+    <label for="cat-type">Tipo</label>
+    <select id="cat-type">
+      <option value="expense">Despesa</option>
+      <option value="income">Receita</option>
+    </select>
+    <div class="error" id="cat-error" role="alert"></div>
+    <div class="dialog-actions">
+      <button type="button" data-close>Cancelar</button>
+      <button class="primary" type="submit">Salvar</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+  const API = '/api';
+  const $ = (selector) => document.querySelector(selector);
+
+  const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+  const money = (value) => brl.format(Number(value));
+  const esc = (text) => String(text).replace(/[&<>"']/g, (c) =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const fmtDate = (iso) => iso.split('-').reverse().join('/');
+  const today = () => new Date().toLocaleDateString('sv-SE'); // AAAA-MM-DD no fuso local
+
+  const state = {
+    token: localStorage.getItem('token'),
+    month: today().slice(0, 7),
+    page: 1,
+    type: '',
+    category: '',
+    categories: [],
+    summary: null,
+  };
+
+  /* ---------- acesso à API ---------- */
+  function firstError(data) {
+    if (data && data.errors) return Object.values(data.errors)[0][0];
+    return data && data.message ? data.message : null;
+  }
+
+  async function api(path, { method = 'GET', body } = {}) {
+    const headers = { Accept: 'application/json', 'Content-Type': 'application/json' };
+    if (state.token) headers.Authorization = 'Bearer ' + state.token;
+
+    const res = await fetch(API + path, { method, headers, body: body ? JSON.stringify(body) : undefined });
+    if (res.status === 204) return null;
+
+    const data = await res.json().catch(() => ({}));
+    if (res.status === 401 && state.token) {
+      clearSession();
+      throw new Error('Sessão expirada. Entre novamente.');
+    }
+    if (!res.ok) throw new Error(firstError(data) || 'Algo deu errado. Tente novamente.');
+    return data;
+  }
+
+  /* ---------- sessão ---------- */
+  function clearSession() {
+    state.token = null;
+    localStorage.removeItem('token');
+    $('#app-view').hidden = true;
+    $('#auth-view').hidden = false;
+  }
+
+  async function logout() {
+    try { await api('/logout', { method: 'POST' }); } catch (e) { /* encerra mesmo assim */ }
+    clearSession();
+  }
+
+  async function showApp() {
+    $('#auth-view').hidden = true;
+    $('#app-view').hidden = false;
+    $('#month').value = state.month;
+    try {
+      const user = await api('/user');
+      $('#user-name').textContent = user.name;
+      await loadCategories();
+      await loadAll();
+    } catch (err) { /* sessão expirada já volta para o login */ }
+  }
+
+  /* ---------- login / cadastro ---------- */
+  let mode = 'login';
+  function setMode(next) {
+    mode = next;
+    $('#name-field').hidden = next !== 'register';
+    $('#auth-name').required = next === 'register';
+    $('#auth-submit').textContent = next === 'login' ? 'Entrar' : 'Criar conta';
+    $('#tab-login').classList.toggle('active', next === 'login');
+    $('#tab-register').classList.toggle('active', next === 'register');
+    $('#auth-password').autocomplete = next === 'login' ? 'current-password' : 'new-password';
+    $('#auth-error').textContent = '';
+  }
+  $('#tab-login').onclick = () => setMode('login');
+  $('#tab-register').onclick = () => setMode('register');
+
+  $('#auth-form').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const body = { email: $('#auth-email').value, password: $('#auth-password').value };
+    if (mode === 'register') body.name = $('#auth-name').value;
+
+    $('#auth-submit').disabled = true;
+    $('#auth-error').textContent = '';
+    try {
+      const data = await api(mode === 'login' ? '/login' : '/register', { method: 'POST', body });
+      state.token = data.token;
+      localStorage.setItem('token', data.token);
+      $('#auth-form').reset();
+      showApp();
+    } catch (err) {
+      $('#auth-error').textContent = err.message;
+    } finally {
+      $('#auth-submit').disabled = false;
+    }
+  });
+
+  $('#btn-logout').onclick = logout;
+
+  /* ---------- carregamento de dados ---------- */
+  async function loadAll() {
+    await Promise.all([loadSummary(), loadTransactions()]);
+  }
+
+  async function loadCategories() {
+    const res = await api('/categories');
+    state.categories = res.data;
+
+    const select = $('#filter-category');
+    select.innerHTML = '<option value="">Todas as categorias</option>' +
+      state.categories.map((c) => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
+    select.value = state.category;
+    fillTxCategories();
+  }
+
+  async function loadSummary() {
+    const s = await api('/summary?month=' + state.month);
+    state.summary = s;
+    $('#sum-income').textContent = money(s.income);
+    $('#sum-expense').textContent = money(s.expense);
+
+    const balance = $('#sum-balance');
+    balance.textContent = money(s.balance);
+    balance.className = 'value ' + (Number(s.balance) < 0 ? 'expense' : 'income');
+
+    const box = $('#by-category');
+    if (!s.by_category.length) {
+      box.innerHTML = '<div class="empty">Sem movimentações neste mês.</div>';
+      return;
+    }
+    box.innerHTML = s.by_category.map((item) => {
+      const base = Number(item.type === 'income' ? s.income : s.expense) || 1;
+      const pct = Math.min(100, (Number(item.total) / base) * 100);
+      const cls = item.type === 'income' ? 'income' : 'expense';
+      return `<div class="cat-item">
+        <div class="cat-line"><span>${esc(item.category)}</span><strong class="${cls}">${money(item.total)}</strong></div>
+        <div class="bar"><span class="${cls}-bg" style="width:${pct.toFixed(1)}%"></span></div>
+      </div>`;
+    }).join('');
+  }
+
+  async function loadTransactions() {
+    const [year, month] = state.month.split('-').map(Number);
+    const lastDay = String(new Date(year, month, 0).getDate()).padStart(2, '0');
+    const query = new URLSearchParams({
+      from: `${state.month}-01`, to: `${state.month}-${lastDay}`, page: state.page, per_page: 8,
+    });
+    if (state.type) query.set('type', state.type);
+    if (state.category) query.set('category_id', state.category);
+
+    const res = await api('/transactions?' + query);
+    const list = $('#tx-list');
+
+    if (!res.data.length) {
+      list.innerHTML = '<div class="empty">Nenhuma transação encontrada.</div>';
+    } else {
+      list.innerHTML = res.data.map((t) => {
+        const income = t.type === 'income';
+        return `<div class="tx">
+          <div class="info">
+            <div class="desc">${esc(t.description)}</div>
+            <div class="muted">${esc(t.category.name)} · ${fmtDate(t.date)}</div>
+          </div>
+          <div class="amount ${income ? 'income' : 'expense'}">${income ? '+' : '-'} ${money(t.amount)}</div>
+          <button type="button" class="danger" data-delete="${t.id}" aria-label="Excluir ${esc(t.description)}">Excluir</button>
+        </div>`;
+      }).join('');
+    }
+
+    $('#tx-total').textContent = res.meta.total + (res.meta.total === 1 ? ' registro' : ' registros');
+    $('#page-info').textContent = `Página ${res.meta.current_page} de ${res.meta.last_page}`;
+    $('#prev').disabled = res.meta.current_page <= 1;
+    $('#next').disabled = res.meta.current_page >= res.meta.last_page;
+  }
+
+  /* ---------- eventos da tela ---------- */
+  $('#month').addEventListener('change', (e) => {
+    if (!e.target.value) return;
+    state.month = e.target.value;
+    state.page = 1;
+    loadAll();
+  });
+  $('#filter-type').addEventListener('change', (e) => { state.type = e.target.value; state.page = 1; loadTransactions(); });
+  $('#filter-category').addEventListener('change', (e) => { state.category = e.target.value; state.page = 1; loadTransactions(); });
+  $('#prev').onclick = () => { state.page--; loadTransactions(); };
+  $('#next').onclick = () => { state.page++; loadTransactions(); };
+
+  $('#tx-list').addEventListener('click', async (event) => {
+    const id = event.target.dataset.delete;
+    if (!id || !confirm('Excluir esta transação?')) return;
+    try {
+      await api('/transactions/' + id, { method: 'DELETE' });
+      await loadAll();
+    } catch (err) { alert(err.message); }
+  });
+
+  /* ---------- diálogos ---------- */
+  document.querySelectorAll('[data-close]').forEach((btn) => {
+    btn.onclick = () => btn.closest('dialog').close();
+  });
+
+  function selectedTxType() {
+    return document.querySelector('input[name="tx-type"]:checked').value;
+  }
+
+  function fillTxCategories() {
+    const options = state.categories.filter((c) => c.type === selectedTxType());
+    $('#tx-category').innerHTML = options.map((c) => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
+    $('#tx-cat-hint').hidden = options.length > 0;
+  }
+  document.querySelectorAll('input[name="tx-type"]').forEach((radio) => radio.addEventListener('change', fillTxCategories));
+
+  $('#btn-new-tx').onclick = () => {
+    $('#tx-form').reset();
+    $('#tx-date').value = today();
+    $('#tx-error').textContent = '';
+    fillTxCategories();
+    $('#tx-dialog').showModal();
+  };
+
+  $('#tx-form').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const body = {
+      category_id: Number($('#tx-category').value),
+      description: $('#tx-desc').value.trim(),
+      amount: Number($('#tx-amount').value),
+      type: selectedTxType(),
+      date: $('#tx-date').value,
+    };
+    try {
+      await api('/transactions', { method: 'POST', body });
+      $('#tx-dialog').close();
+      // Vai para o mês da transação criada, para ela aparecer na lista.
+      state.month = body.date.slice(0, 7);
+      state.page = 1;
+      $('#month').value = state.month;
+      await loadAll();
+    } catch (err) {
+      $('#tx-error').textContent = err.message;
+    }
+  });
+
+  $('#btn-new-cat').onclick = () => {
+    $('#cat-form').reset();
+    $('#cat-error').textContent = '';
+    $('#cat-dialog').showModal();
+  };
+
+  $('#cat-form').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    try {
+      await api('/categories', { method: 'POST', body: { name: $('#cat-name').value.trim(), type: $('#cat-type').value } });
+      $('#cat-dialog').close();
+      await loadCategories();
+    } catch (err) {
+      $('#cat-error').textContent = err.message;
+    }
+  });
+
+  /* ---------- início ---------- */
+  if (state.token) {
+    showApp();
+  } else {
+    $('#auth-view').hidden = false;
+  }
+</script>
+</body>
+</html>
