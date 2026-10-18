@@ -8,7 +8,8 @@ use Illuminate\Database\Seeder;
 class DatabaseSeeder extends Seeder
 {
     /**
-     * Cria um usuário de demonstração com três meses de movimentações.
+     * Cria um usuário de demonstração com três meses de movimentações
+     * e orçamentos em situações diferentes (ok, alerta e estourado).
      * Login: demo@finance.test / demo12345
      */
     public function run(): void
@@ -58,6 +59,23 @@ class DatabaseSeeder extends Seeder
                     'date' => $month->copy()->day($day)->toDateString(),
                 ]);
             }
+        }
+
+        // Orçamentos mensais. No mês atual:
+        //  Lazer       95,90 de 150    -> ok
+        //  Transporte 210,00 de 250    -> alerta (84%)
+        //  Moradia   1200,00 de 1200   -> alerta (100%)
+        //  Alimentação 656,95 de 600   -> estourado
+        foreach ([
+            ['Alimentação', 600],
+            ['Transporte', 250],
+            ['Lazer', 150],
+            ['Moradia', 1200],
+        ] as [$name, $limit]) {
+            $user->budgets()->create([
+                'category_id' => $categories[$name]->id,
+                'amount' => $limit,
+            ]);
         }
     }
 }

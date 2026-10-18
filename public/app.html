@@ -8,13 +8,13 @@
   :root {
     --bg: #f5f6f8; --card: #ffffff; --text: #1c2430; --muted: #6b7686;
     --border: #e3e7ee; --primary: #2f6fed; --primary-text: #ffffff;
-    --income: #168a52; --expense: #d4402f; --radius: 12px;
+    --income: #168a52; --expense: #d4402f; --warning: #b7791f; --radius: 12px;
   }
   @media (prefers-color-scheme: dark) {
     :root {
       --bg: #10141b; --card: #181e28; --text: #e8ecf3; --muted: #98a3b5;
       --border: #2a3342; --primary: #6c9bff; --primary-text: #0d1117;
-      --income: #3ecf8e; --expense: #ff7a6b;
+      --income: #3ecf8e; --expense: #ff7a6b; --warning: #f5b74a;
     }
   }
   * { box-sizing: border-box; }
@@ -57,13 +57,21 @@
   header.top .right { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
   header.top input[type=month] { width: auto; }
 
+  /* avisos de orçamento */
+  .alerts { display: grid; gap: 8px; margin-bottom: 16px; }
+  .alert { padding: 10px 14px; border-radius: 8px; border: 1px solid; font-size: .92rem; }
+  .alert.warning { border-color: var(--warning); background: color-mix(in srgb, var(--warning) 14%, transparent); }
+  .alert.exceeded { border-color: var(--expense); background: color-mix(in srgb, var(--expense) 14%, transparent); }
+
   /* resumo */
   .summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
   .summary .value { font-size: 1.6rem; font-weight: 700; margin-top: 4px; }
   .summary .cmp { font-size: .8rem; color: var(--muted); margin-top: 2px; min-height: 1.2em; }
   .income { color: var(--income); } .expense { color: var(--expense); }
+  .warning { color: var(--warning); } .exceeded { color: var(--expense); }
 
   .charts, .grid { display: grid; gap: 16px; margin-bottom: 16px; }
+  .stack { display: grid; gap: 16px; }
   @media (min-width: 860px) {
     .charts { grid-template-columns: 1fr 1.2fr; }
     .grid { grid-template-columns: 1fr 1.7fr; align-items: start; }
@@ -86,12 +94,17 @@
   .axis { font-size: 11px; fill: var(--muted); }
   .chart-legend { display: flex; gap: 14px; justify-content: center; font-size: .85rem; color: var(--muted); margin-top: 6px; }
 
-  /* categorias */
-  .cat-item { margin-bottom: 14px; }
-  .cat-line { display: flex; justify-content: space-between; font-size: .92rem; gap: 8px; }
-  .bar { height: 8px; border-radius: 99px; background: var(--border); overflow: hidden; margin-top: 5px; }
+  /* barras de progresso */
+  .cat-item, .budget { margin-bottom: 14px; }
+  .cat-line { display: flex; justify-content: space-between; align-items: center; font-size: .92rem; gap: 8px; }
+  .bar { height: 8px; border-radius: 99px; background: var(--border); overflow: hidden; margin: 5px 0; }
   .bar > span { display: block; height: 100%; border-radius: 99px; }
-  .bar .income-bg { background: var(--income); } .bar .expense-bg { background: var(--expense); }
+  .bar .income-bg, .bar .ok-bg { background: var(--income); }
+  .bar .expense-bg, .bar .exceeded-bg { background: var(--expense); }
+  .bar .warning-bg { background: var(--warning); }
+  .budget .actions { display: flex; gap: 6px; }
+  .budget .note { font-size: .85rem; }
+  .budget .note.ok { color: var(--muted); }
 
   /* transações */
   .filters { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
@@ -102,7 +115,7 @@
   .tx .desc { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .tx .amount { font-weight: 700; white-space: nowrap; }
   .pager { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; }
-  .empty { text-align: center; padding: 24px 8px; color: var(--muted); }
+  .empty { text-align: center; padding: 20px 8px; color: var(--muted); }
 
   /* diálogos */
   dialog { border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); color: var(--text); padding: 20px; width: min(440px, 92vw); }
@@ -160,6 +173,8 @@
       </div>
     </header>
 
+    <div class="alerts" id="alerts"></div>
+
     <section class="summary">
       <div class="card"><div class="muted">Receitas</div><div class="value income" id="sum-income">R$ 0,00</div><div class="cmp" id="cmp-income"></div></div>
       <div class="card"><div class="muted">Despesas</div><div class="value expense" id="sum-expense">R$ 0,00</div><div class="cmp" id="cmp-expense"></div></div>
@@ -178,16 +193,26 @@
     </section>
 
     <div class="grid">
-      <section class="card">
-        <div class="panel-head">
-          <h2>Por categoria</h2>
-          <div class="links">
-            <button class="link" type="button" id="btn-manage-cats">Gerenciar</button>
-            <button class="link" type="button" id="btn-new-cat">+ Nova</button>
+      <div class="stack">
+        <section class="card">
+          <div class="panel-head">
+            <h2>Orçamentos <span class="muted" id="budget-month"></span></h2>
+            <button class="link" type="button" id="btn-new-budget">+ Novo</button>
           </div>
-        </div>
-        <div id="by-category"></div>
-      </section>
+          <div id="budgets"></div>
+        </section>
+
+        <section class="card">
+          <div class="panel-head">
+            <h2>Por categoria</h2>
+            <div class="links">
+              <button class="link" type="button" id="btn-manage-cats">Gerenciar</button>
+              <button class="link" type="button" id="btn-new-cat">+ Nova</button>
+            </div>
+          </div>
+          <div id="by-category"></div>
+        </section>
+      </div>
 
       <section class="card">
         <div class="panel-head"><h2>Transações</h2><span class="muted" id="tx-total"></span></div>
@@ -229,6 +254,24 @@
       <div><label for="tx-date">Data</label><input id="tx-date" type="date" required></div>
     </div>
     <div class="error" id="tx-error" role="alert"></div>
+    <div class="dialog-actions">
+      <button type="button" data-close>Cancelar</button>
+      <button class="primary" type="submit">Salvar</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Diálogo: novo ou editar orçamento -->
+<dialog id="budget-dialog">
+  <form id="budget-form">
+    <h2 id="budget-title">Novo orçamento</h2>
+    <label for="budget-category">Categoria de despesa</label>
+    <select id="budget-category" required></select>
+    <div class="muted" id="budget-hint" hidden>Todas as suas categorias de despesa já têm orçamento. Crie uma nova categoria para adicionar outro.</div>
+    <label for="budget-amount">Limite mensal (R$)</label>
+    <input id="budget-amount" type="number" step="0.01" min="0.01" required>
+    <div class="muted">Você será avisado ao passar de 80% do limite e quando ele for ultrapassado.</div>
+    <div class="error" id="budget-error" role="alert"></div>
     <div class="dialog-actions">
       <button type="button" data-close>Cancelar</button>
       <button class="primary" type="submit">Salvar</button>
@@ -285,8 +328,10 @@
     type: '',
     category: '',
     categories: [],
+    budgets: [],
     txById: {},
     editingTx: null,
+    editingBudget: null,
     editingCat: null,
   };
 
@@ -377,7 +422,7 @@
   /* ---------- carregamento de dados ---------- */
   async function loadAll() {
     try {
-      await Promise.all([loadSummary(), loadTransactions(), loadHistory()]);
+      await Promise.all([loadSummary(), loadTransactions(), loadHistory(), loadBudgets()]);
     } catch (err) { /* erros de sessão já tratados em api() */ }
   }
 
@@ -425,6 +470,119 @@
       </div>`;
     }).join('');
   }
+
+  /* ---------- orçamentos ---------- */
+  async function loadBudgets() {
+    const res = await api('/budgets?month=' + state.month);
+    state.budgets = res.data;
+
+    const [year, month] = state.month.split('-').map(Number);
+    $('#budget-month').textContent = new Date(year, month - 1, 1)
+      .toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+
+    renderBudgets();
+    renderAlerts();
+  }
+
+  function renderBudgets() {
+    const box = $('#budgets');
+    if (!state.budgets.length) {
+      box.innerHTML = '<div class="empty">Nenhum orçamento definido. Crie um para acompanhar seus gastos por categoria.</div>';
+      return;
+    }
+    box.innerHTML = state.budgets.map((b) => {
+      const percent = Number(b.percent);
+      const width = Math.min(100, percent);
+      const remaining = Number(b.remaining);
+      const note = remaining < 0
+        ? `Estourou em ${money(Math.abs(remaining))}`
+        : `Restam ${money(remaining)}`;
+      return `<div class="budget">
+        <div class="cat-line"><strong>${esc(b.category.name)}</strong><span class="muted">${money(b.spent)} de ${money(b.amount)}</span></div>
+        <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(width)}" aria-label="Orçamento de ${esc(b.category.name)}">
+          <span class="${b.status}-bg" style="width:${width.toFixed(1)}%"></span>
+        </div>
+        <div class="cat-line">
+          <span class="note ${b.status}">${percent.toFixed(0)}% · ${note}</span>
+          <span class="actions">
+            <button type="button" class="small" data-budget-edit="${b.id}">Editar</button>
+            <button type="button" class="small danger" data-budget-del="${b.id}">Excluir</button>
+          </span>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function renderAlerts() {
+    const order = { exceeded: 0, warning: 1 };
+    const items = state.budgets
+      .filter((b) => b.status !== 'ok')
+      .sort((a, b) => order[a.status] - order[b.status])
+      .map((b) => {
+        const name = `<strong>${esc(b.category.name)}</strong>`;
+        const percent = Number(b.percent).toFixed(0);
+        if (b.status === 'exceeded') {
+          return `<div class="alert exceeded" role="alert">${name}: orçamento estourado em ${money(Math.abs(Number(b.remaining)))} (${percent}% do limite).</div>`;
+        }
+        return `<div class="alert warning" role="alert">${name}: ${percent}% do orçamento usado. Restam ${money(b.remaining)}.</div>`;
+      });
+    $('#alerts').innerHTML = items.join('');
+  }
+
+  function openBudgetDialog(budget = null) {
+    state.editingBudget = budget;
+    $('#budget-form').reset();
+    $('#budget-error').textContent = '';
+    $('#budget-title').textContent = budget ? 'Editar orçamento' : 'Novo orçamento';
+
+    const select = $('#budget-category');
+    if (budget) {
+      select.innerHTML = `<option value="${budget.category.id}">${esc(budget.category.name)}</option>`;
+      select.disabled = true;
+      $('#budget-hint').hidden = true;
+      $('#budget-amount').value = Number(budget.amount);
+    } else {
+      const used = new Set(state.budgets.map((b) => b.category.id));
+      const options = state.categories.filter((c) => c.type === 'expense' && !used.has(c.id));
+      select.innerHTML = options.map((c) => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
+      select.disabled = false;
+      $('#budget-hint').hidden = options.length > 0;
+    }
+    $('#budget-dialog').showModal();
+  }
+
+  $('#btn-new-budget').onclick = () => openBudgetDialog();
+
+  $('#budget-form').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const editing = state.editingBudget;
+    const amount = Number($('#budget-amount').value);
+    try {
+      if (editing) {
+        await api('/budgets/' + editing.id, { method: 'PUT', body: { amount } });
+      } else {
+        await api('/budgets', { method: 'POST', body: { category_id: Number($('#budget-category').value), amount } });
+      }
+      $('#budget-dialog').close();
+      await loadBudgets();
+    } catch (err) {
+      $('#budget-error').textContent = err.message;
+    }
+  });
+
+  $('#budgets').addEventListener('click', async (event) => {
+    const { budgetEdit, budgetDel } = event.target.dataset;
+
+    if (budgetEdit) {
+      openBudgetDialog(state.budgets.find((b) => b.id === Number(budgetEdit)));
+    } else if (budgetDel) {
+      if (!confirm('Excluir este orçamento?')) return;
+      try {
+        await api('/budgets/' + budgetDel, { method: 'DELETE' });
+        await loadBudgets();
+      } catch (err) { alert(err.message); }
+    }
+  });
 
   /* ---------- gráficos ---------- */
   function renderDonut(s) {
@@ -726,7 +884,7 @@
         $('#cats-error').textContent = err.message;
       }
     } else if (data.catDel) {
-      if (!confirm('Excluir esta categoria?')) return;
+      if (!confirm('Excluir esta categoria? O orçamento dela, se existir, também será removido.')) return;
       try {
         await api('/categories/' + data.catDel, { method: 'DELETE' });
         await loadCategories();
