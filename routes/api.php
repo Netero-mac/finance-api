@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\BudgetController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\SummaryController;
 use App\Http\Controllers\Api\TransactionController;
@@ -16,6 +17,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResource('categories', CategoryController::class);
     Route::apiResource('transactions', TransactionController::class);
+    Route::apiResource('budgets', BudgetController::class)->except('show');
 
     Route::get('/summary', SummaryController::class);
 });
