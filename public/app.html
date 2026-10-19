@@ -35,6 +35,7 @@
     width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border);
     background: var(--bg); color: var(--text); font: inherit;
   }
+  input[type=checkbox] { width: auto; }
   input:focus, select:focus, button:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
   button { font: inherit; cursor: pointer; border-radius: 8px; border: 1px solid var(--border); padding: 9px 14px; background: var(--card); color: var(--text); }
   button.primary { background: var(--primary); color: var(--primary-text); border-color: var(--primary); font-weight: 600; }
@@ -53,9 +54,11 @@
   #auth-submit { width: 100%; margin-top: 14px; }
 
   /* topo */
-  header.top { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+  header.top { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 14px; }
   header.top .right { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
   header.top input[type=month] { width: auto; }
+  nav.views { display: flex; gap: 6px; margin-bottom: 18px; }
+  nav.views button.active { background: var(--primary); color: var(--primary-text); border-color: var(--primary); font-weight: 600; }
 
   /* avisos de orçamento */
   .alerts { display: grid; gap: 8px; margin-bottom: 16px; }
@@ -65,7 +68,7 @@
 
   /* resumo */
   .summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
-  .summary .value { font-size: 1.6rem; font-weight: 700; margin-top: 4px; }
+  .summary .value, .big { font-size: 1.6rem; font-weight: 700; margin-top: 4px; }
   .summary .cmp { font-size: .8rem; color: var(--muted); margin-top: 2px; min-height: 1.2em; }
   .income { color: var(--income); } .expense { color: var(--expense); }
   .warning { color: var(--warning); } .exceeded { color: var(--expense); }
@@ -75,11 +78,12 @@
   @media (min-width: 860px) {
     .charts { grid-template-columns: 1fr 1.2fr; }
     .grid { grid-template-columns: 1fr 1.7fr; align-items: start; }
+    .grid.cards-grid { grid-template-columns: 1fr 1.3fr; }
   }
   @media (max-width: 640px) { .summary { grid-template-columns: 1fr; } }
 
   .panel-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
-  .panel-head .links { display: flex; gap: 12px; }
+  .panel-head .links, .actions { display: flex; gap: 8px; align-items: center; }
 
   /* gráficos */
   .donut-wrap { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
@@ -95,18 +99,17 @@
   .chart-legend { display: flex; gap: 14px; justify-content: center; font-size: .85rem; color: var(--muted); margin-top: 6px; }
 
   /* barras de progresso */
-  .cat-item, .budget { margin-bottom: 14px; }
+  .cat-item, .budget, .purchase { margin-bottom: 14px; }
   .cat-line { display: flex; justify-content: space-between; align-items: center; font-size: .92rem; gap: 8px; }
   .bar { height: 8px; border-radius: 99px; background: var(--border); overflow: hidden; margin: 5px 0; }
   .bar > span { display: block; height: 100%; border-radius: 99px; }
   .bar .income-bg, .bar .ok-bg { background: var(--income); }
   .bar .expense-bg, .bar .exceeded-bg { background: var(--expense); }
   .bar .warning-bg { background: var(--warning); }
-  .budget .actions { display: flex; gap: 6px; }
   .budget .note { font-size: .85rem; }
   .budget .note.ok { color: var(--muted); }
 
-  /* transações */
+  /* transações e itens de fatura */
   .filters { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
   .filters select { width: auto; flex: 1; min-width: 120px; }
   .tx { display: flex; align-items: center; gap: 8px; padding: 11px 0; border-top: 1px solid var(--border); }
@@ -117,8 +120,36 @@
   .pager { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; }
   .empty { text-align: center; padding: 20px 8px; color: var(--muted); }
 
+  /* cartões */
+  .card-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+  .card-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+  .card-tabs button.active { border-color: var(--primary); color: var(--primary); font-weight: 600; }
+  .limit-line { display: flex; justify-content: space-between; font-size: .95rem; margin-top: 6px; }
+  .badge-paid { font-size: .72rem; padding: 2px 8px; border-radius: 99px; border: 1px solid var(--income); color: var(--income); margin-right: 6px; }
+  .purchase { padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+  .purchase:last-child { border-bottom: none; margin-bottom: 0; }
+
+  /* simulador e antecipação */
+  .sim-box, .quote-box { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-top: 14px; min-height: 64px; }
+  .sim-main { font-size: 1.15rem; margin-bottom: 4px; }
+  .inst-list { list-style: none; margin: 8px 0 0; padding: 0; max-height: 200px; overflow-y: auto; }
+  .inst-list li { display: flex; justify-content: space-between; padding: 3px 0; font-size: .9rem; }
+  details summary { cursor: pointer; color: var(--primary); font-size: .9rem; margin-top: 6px; }
+  .pp-list { max-height: 220px; overflow-y: auto; margin-top: 8px; border: 1px solid var(--border); border-radius: 8px; padding: 4px 10px; }
+  .pp-item { display: flex; align-items: center; gap: 10px; margin: 0; padding: 7px 0; font-weight: 400; border-top: 1px solid var(--border); cursor: pointer; }
+  .pp-item:first-child { border-top: none; }
+  .pp-item span { flex: 1; }
+  .pp-table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+  .pp-table th, .pp-table td { text-align: right; padding: 4px 4px; }
+  .pp-table th:first-child, .pp-table td:first-child { text-align: left; }
+  .pp-table th { color: var(--muted); font-weight: 600; }
+  .pp-totals { margin-top: 10px; display: grid; gap: 2px; font-size: .95rem; }
+  .pp-totals div { display: flex; justify-content: space-between; }
+  .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 10px 18px; border-radius: 99px; font-size: .92rem; z-index: 50; max-width: 90vw; }
+
   /* diálogos */
-  dialog { border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); color: var(--text); padding: 20px; width: min(440px, 92vw); }
+  dialog { border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); color: var(--text); padding: 20px; width: min(440px, 92vw); max-height: 92vh; overflow-y: auto; }
+  dialog.wide { width: min(560px, 94vw); }
   dialog::backdrop { background: rgba(0, 0, 0, .45); }
   .row { display: flex; gap: 8px; } .row > * { flex: 1; }
   .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
@@ -167,73 +198,117 @@
         <div class="muted">Olá, <span id="user-name"></span></div>
       </div>
       <div class="right">
-        <input type="month" id="month" aria-label="Mês">
-        <button class="primary" type="button" id="btn-new-tx">+ Nova transação</button>
+        <span class="right" id="dash-actions">
+          <input type="month" id="month" aria-label="Mês">
+          <button class="primary" type="button" id="btn-new-tx">+ Nova transação</button>
+        </span>
         <button type="button" id="btn-logout">Sair</button>
       </div>
     </header>
 
-    <div class="alerts" id="alerts"></div>
+    <nav class="views" aria-label="Seções">
+      <button type="button" data-view="dashboard" class="active">Painel</button>
+      <button type="button" data-view="cards">Cartões</button>
+    </nav>
 
-    <section class="summary">
-      <div class="card"><div class="muted">Receitas</div><div class="value income" id="sum-income">R$ 0,00</div><div class="cmp" id="cmp-income"></div></div>
-      <div class="card"><div class="muted">Despesas</div><div class="value expense" id="sum-expense">R$ 0,00</div><div class="cmp" id="cmp-expense"></div></div>
-      <div class="card"><div class="muted">Saldo</div><div class="value" id="sum-balance">R$ 0,00</div><div class="cmp" id="cmp-balance"></div></div>
-    </section>
+    <!-- Painel -->
+    <div id="dashboard-view">
+      <div class="alerts" id="alerts"></div>
 
-    <section class="charts">
-      <div class="card">
-        <div class="panel-head"><h2>Despesas por categoria</h2></div>
-        <div id="donut"></div>
-      </div>
-      <div class="card">
-        <div class="panel-head"><h2>Últimos 6 meses</h2></div>
-        <div id="bars"></div>
-      </div>
-    </section>
+      <section class="summary">
+        <div class="card"><div class="muted">Receitas</div><div class="value income" id="sum-income">R$ 0,00</div><div class="cmp" id="cmp-income"></div></div>
+        <div class="card"><div class="muted">Despesas</div><div class="value expense" id="sum-expense">R$ 0,00</div><div class="cmp" id="cmp-expense"></div></div>
+        <div class="card"><div class="muted">Saldo</div><div class="value" id="sum-balance">R$ 0,00</div><div class="cmp" id="cmp-balance"></div></div>
+      </section>
 
-    <div class="grid">
-      <div class="stack">
-        <section class="card">
-          <div class="panel-head">
-            <h2>Orçamentos <span class="muted" id="budget-month"></span></h2>
-            <button class="link" type="button" id="btn-new-budget">+ Novo</button>
-          </div>
-          <div id="budgets"></div>
-        </section>
-
-        <section class="card">
-          <div class="panel-head">
-            <h2>Por categoria</h2>
-            <div class="links">
-              <button class="link" type="button" id="btn-manage-cats">Gerenciar</button>
-              <button class="link" type="button" id="btn-new-cat">+ Nova</button>
-            </div>
-          </div>
-          <div id="by-category"></div>
-        </section>
-      </div>
-
-      <section class="card">
-        <div class="panel-head"><h2>Transações</h2><span class="muted" id="tx-total"></span></div>
-        <div class="filters">
-          <select id="filter-type" aria-label="Filtrar por tipo">
-            <option value="">Todos os tipos</option>
-            <option value="income">Receitas</option>
-            <option value="expense">Despesas</option>
-          </select>
-          <select id="filter-category" aria-label="Filtrar por categoria"></select>
+      <section class="charts">
+        <div class="card">
+          <div class="panel-head"><h2>Despesas por categoria</h2></div>
+          <div id="donut"></div>
         </div>
-        <div id="tx-list"></div>
-        <div class="pager">
-          <button type="button" id="prev">&larr; Anterior</button>
-          <span class="muted" id="page-info"></span>
-          <button type="button" id="next">Próxima &rarr;</button>
+        <div class="card">
+          <div class="panel-head"><h2>Últimos 6 meses</h2></div>
+          <div id="bars"></div>
         </div>
       </section>
+
+      <div class="grid">
+        <div class="stack">
+          <section class="card">
+            <div class="panel-head">
+              <h2>Orçamentos <span class="muted" id="budget-month"></span></h2>
+              <button class="link" type="button" id="btn-new-budget">+ Novo</button>
+            </div>
+            <div id="budgets"></div>
+          </section>
+
+          <section class="card">
+            <div class="panel-head">
+              <h2>Por categoria</h2>
+              <div class="links">
+                <button class="link" type="button" id="btn-manage-cats">Gerenciar</button>
+                <button class="link" type="button" id="btn-new-cat">+ Nova</button>
+              </div>
+            </div>
+            <div id="by-category"></div>
+          </section>
+        </div>
+
+        <section class="card">
+          <div class="panel-head"><h2>Transações</h2><span class="muted" id="tx-total"></span></div>
+          <div class="filters">
+            <select id="filter-type" aria-label="Filtrar por tipo">
+              <option value="">Todos os tipos</option>
+              <option value="income">Receitas</option>
+              <option value="expense">Despesas</option>
+            </select>
+            <select id="filter-category" aria-label="Filtrar por categoria"></select>
+          </div>
+          <div id="tx-list"></div>
+          <div class="pager">
+            <button type="button" id="prev">&larr; Anterior</button>
+            <span class="muted" id="page-info"></span>
+            <button type="button" id="next">Próxima &rarr;</button>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- Cartões -->
+    <div id="cards-view" hidden>
+      <div class="card-toolbar">
+        <div class="card-tabs" id="card-tabs"></div>
+        <button class="primary" type="button" id="btn-new-card">+ Novo cartão</button>
+      </div>
+
+      <div class="card empty" id="card-empty" hidden>Nenhum cartão cadastrado. Crie o primeiro para registrar compras parceladas.</div>
+
+      <div id="card-detail" hidden>
+        <section class="card" id="card-summary" style="margin-bottom:16px"></section>
+
+        <div class="grid cards-grid">
+          <section class="card">
+            <div class="panel-head">
+              <h2>Fatura</h2>
+              <input type="month" id="invoice-month" aria-label="Mês da fatura" style="width:auto">
+            </div>
+            <div id="invoice"></div>
+          </section>
+
+          <section class="card">
+            <div class="panel-head">
+              <h2>Compras parceladas</h2>
+              <button class="link" type="button" id="btn-new-purchase">+ Nova compra</button>
+            </div>
+            <div id="purchases"></div>
+          </section>
+        </div>
+      </div>
     </div>
   </div>
 </div>
+
+<div class="toast" id="toast" role="status" hidden></div>
 
 <!-- Diálogo: nova ou editar transação -->
 <dialog id="tx-dialog">
@@ -309,6 +384,73 @@
   </div>
 </dialog>
 
+<!-- Diálogo: novo ou editar cartão -->
+<dialog id="card-dialog">
+  <form id="card-form">
+    <h2 id="card-title">Novo cartão</h2>
+    <label for="cd-name">Nome do cartão</label>
+    <input id="cd-name" required maxlength="100">
+    <label for="cd-limit">Limite (R$)</label>
+    <input id="cd-limit" type="number" step="0.01" min="0.01" required>
+    <div class="row">
+      <div><label for="cd-closing">Dia de fechamento</label><input id="cd-closing" type="number" min="1" max="28" required></div>
+      <div><label for="cd-due">Dia de vencimento</label><input id="cd-due" type="number" min="1" max="28" required></div>
+    </div>
+    <div class="muted">Dias de 1 a 28. Compras feitas até o dia de fechamento entram na fatura que fecha naquele mês.</div>
+    <div class="error" id="cd-error" role="alert"></div>
+    <div class="dialog-actions">
+      <button type="button" data-close>Cancelar</button>
+      <button class="primary" type="submit">Salvar</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Diálogo: nova compra parcelada, com simulador -->
+<dialog id="purchase-dialog" class="wide">
+  <form id="purchase-form">
+    <h2>Nova compra parcelada</h2>
+    <label for="pu-desc">Descrição</label>
+    <input id="pu-desc" required maxlength="255">
+    <label for="pu-category">Categoria</label>
+    <select id="pu-category" required></select>
+    <div class="muted" id="pu-cat-hint" hidden>Crie uma categoria de despesa primeiro.</div>
+    <div class="row">
+      <div><label for="pu-total">Valor da compra (R$)</label><input id="pu-total" type="number" step="0.01" min="0.01" required></div>
+      <div><label for="pu-count">Parcelas</label><input id="pu-count" type="number" min="1" max="48" value="1" required></div>
+    </div>
+    <div class="row">
+      <div><label for="pu-rate">Juros ao mês (%)</label><input id="pu-rate" type="number" step="0.01" min="0" max="30" value="0"></div>
+      <div><label for="pu-date">Data da compra</label><input id="pu-date" type="date" required></div>
+    </div>
+    <div class="muted">Deixe os juros em 0 para parcelar sem juros.</div>
+    <div class="sim-box" id="sim-box"><div class="muted">Informe o valor e as parcelas para ver a simulação.</div></div>
+    <div class="error" id="pu-error" role="alert"></div>
+    <div class="dialog-actions">
+      <button type="button" data-close>Cancelar</button>
+      <button class="primary" type="submit" id="pu-save" disabled>Registrar compra</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Diálogo: antecipar parcelas -->
+<dialog id="prepay-dialog" class="wide">
+  <h2 id="pp-title">Antecipar parcelas</h2>
+  <div class="muted">Marque as parcelas que deseja pagar antes do vencimento. Os juros são reduzidos proporcionalmente.</div>
+  <div class="actions" style="margin-top:12px">
+    <button type="button" class="small" id="pp-all">Marcar todas</button>
+    <button type="button" class="small" id="pp-none">Limpar</button>
+  </div>
+  <div class="pp-list" id="pp-list"></div>
+  <label for="pp-date">Data do pagamento</label>
+  <input id="pp-date" type="date" style="max-width:200px">
+  <div class="quote-box" id="pp-quote"><div class="muted">Marque as parcelas que deseja antecipar.</div></div>
+  <div class="error" id="pp-error" role="alert"></div>
+  <div class="dialog-actions">
+    <button type="button" data-close>Cancelar</button>
+    <button class="primary" type="button" id="pp-confirm" disabled>Pagar antecipadamente</button>
+  </div>
+</dialog>
+
 <script>
   const API = '/api';
   const $ = (selector) => document.querySelector(selector);
@@ -321,8 +463,22 @@
   const today = () => new Date().toLocaleDateString('sv-SE'); // AAAA-MM-DD no fuso local
   const PALETTE = ['#2f6fed', '#e5484d', '#f5a524', '#17a673', '#8e4ec6', '#0ea5b7', '#d6409f', '#7c8798'];
 
+  const debounce = (fn, ms) => {
+    let timer;
+    return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), ms); };
+  };
+
+  function toast(message) {
+    const el = $('#toast');
+    el.textContent = message;
+    el.hidden = false;
+    clearTimeout(toast.timer);
+    toast.timer = setTimeout(() => { el.hidden = true; }, 4500);
+  }
+
   const state = {
     token: localStorage.getItem('token'),
+    view: 'dashboard',
     month: today().slice(0, 7),
     page: 1,
     type: '',
@@ -333,6 +489,13 @@
     editingTx: null,
     editingBudget: null,
     editingCat: null,
+    // cartões
+    cards: [],
+    cardId: null,
+    invoiceMonth: today().slice(0, 7),
+    purchases: [],
+    editingCard: null,
+    prepay: null,
   };
 
   /* ---------- acesso à API ---------- */
@@ -374,6 +537,7 @@
     $('#auth-view').hidden = true;
     $('#app-view').hidden = false;
     $('#month').value = state.month;
+    setView('dashboard', { load: false });
     try {
       const user = await api('/user');
       $('#user-name').textContent = user.name;
@@ -381,6 +545,21 @@
       await loadAll();
     } catch (err) { /* sessão expirada já volta para o login */ }
   }
+
+  /* ---------- navegação entre seções ---------- */
+  function setView(view, { load = true } = {}) {
+    state.view = view;
+    $('#dashboard-view').hidden = view !== 'dashboard';
+    $('#cards-view').hidden = view !== 'cards';
+    $('#dash-actions').hidden = view !== 'dashboard';
+    document.querySelectorAll('[data-view]').forEach((btn) => {
+      btn.classList.toggle('active', btn.dataset.view === view);
+    });
+    if (view === 'cards' && load) loadCards();
+  }
+  document.querySelectorAll('[data-view]').forEach((btn) => {
+    btn.onclick = () => setView(btn.dataset.view);
+  });
 
   /* ---------- login / cadastro ---------- */
   let mode = 'login';
@@ -419,7 +598,7 @@
 
   $('#btn-logout').onclick = logout;
 
-  /* ---------- carregamento de dados ---------- */
+  /* ---------- carregamento de dados do painel ---------- */
   async function loadAll() {
     try {
       await Promise.all([loadSummary(), loadTransactions(), loadHistory(), loadBudgets()]);
@@ -719,7 +898,7 @@
     $('#next').disabled = res.meta.current_page >= res.meta.last_page;
   }
 
-  /* ---------- eventos da tela ---------- */
+  /* ---------- eventos do painel ---------- */
   $('#month').addEventListener('change', (e) => {
     if (!e.target.value) return;
     state.month = e.target.value;
@@ -745,7 +924,7 @@
     } catch (err) { alert(err.message); }
   });
 
-  /* ---------- diálogos ---------- */
+  /* ---------- diálogos genéricos ---------- */
   document.querySelectorAll('[data-close]').forEach((btn) => {
     btn.onclick = () => btn.closest('dialog').close();
   });
@@ -894,6 +1073,414 @@
       }
     }
   });
+
+  /* =====================================================================
+     CARTÕES DE CRÉDITO
+     ===================================================================== */
+
+  const currentCard = () => state.cards.find((c) => c.id === state.cardId);
+
+  async function loadCards() {
+    try {
+      const res = await api('/cards');
+      state.cards = res.data;
+      if (!currentCard()) state.cardId = state.cards.length ? state.cards[0].id : null;
+      renderCardTabs();
+      await loadCardDetail();
+    } catch (err) { /* sessão expirada já volta para o login */ }
+  }
+
+  function renderCardTabs() {
+    $('#card-tabs').innerHTML = state.cards.map((c) =>
+      `<button type="button" data-card-id="${c.id}" class="${c.id === state.cardId ? 'active' : ''}">${esc(c.name)}</button>`
+    ).join('');
+  }
+
+  async function loadCardDetail() {
+    const card = currentCard();
+    $('#card-empty').hidden = Boolean(card);
+    $('#card-detail').hidden = !card;
+    if (!card) return;
+
+    $('#invoice-month').value = state.invoiceMonth;
+    renderCardSummary(card);
+
+    const [purchases, invoice] = await Promise.all([
+      api(`/cards/${card.id}/purchases`),
+      api(`/cards/${card.id}/invoice?month=${state.invoiceMonth}`),
+    ]);
+    state.purchases = purchases.data;
+    renderPurchases();
+    renderInvoice(invoice);
+  }
+
+  function renderCardSummary(card) {
+    const limit = Number(card.credit_limit);
+    const used = Number(card.used);
+    const percent = limit > 0 ? (used / limit) * 100 : 0;
+    const status = percent >= 100 ? 'exceeded' : percent >= 80 ? 'warning' : 'ok';
+
+    $('#card-summary').innerHTML = `
+      <div class="panel-head">
+        <h2>${esc(card.name)}</h2>
+        <span class="actions">
+          <button type="button" class="small" data-card-edit="1">Editar</button>
+          <button type="button" class="small danger" data-card-del="1">Excluir</button>
+        </span>
+      </div>
+      <div class="limit-line"><span>Usado <strong>${money(card.used)}</strong></span><span>Limite <strong>${money(card.credit_limit)}</strong></span></div>
+      <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(Math.min(100, percent))}" aria-label="Limite usado">
+        <span class="${status}-bg" style="width:${Math.min(100, percent).toFixed(1)}%"></span>
+      </div>
+      <div class="muted">Disponível ${money(card.available)} · fecha dia ${card.closing_day} · vence dia ${card.due_day}</div>`;
+  }
+
+  function renderInvoice(inv) {
+    const items = inv.items.length
+      ? inv.items.map((i) => `<div class="tx">
+          <div class="info">
+            <div class="desc">${esc(i.description)} <span class="muted">(${i.number}/${i.count})</span></div>
+            <div class="muted">${i.category ? esc(i.category) + ' · ' : ''}compra em ${fmtDate(i.purchase_date)}</div>
+          </div>
+          <div class="amount">${i.status === 'paid'
+            ? `<span class="badge-paid">Paga</span>${money(i.paid_amount)}`
+            : money(i.amount)}</div>
+        </div>`).join('')
+      : '<div class="empty">Nenhuma parcela nesta fatura.</div>';
+
+    const paid = Number(inv.paid_total) > 0
+      ? `<div class="muted">Já pago ou antecipado: ${money(inv.paid_total)}</div>` : '';
+
+    $('#invoice').innerHTML = `
+      <div class="muted">Fecha em ${fmtDate(inv.closing_date)} · vence em ${fmtDate(inv.due_date)}</div>
+      <div class="big">${money(inv.total)}</div>
+      <div class="muted">em aberto</div>
+      ${paid}
+      <div style="margin-top:10px">${items}</div>`;
+  }
+
+  function renderPurchases() {
+    const box = $('#purchases');
+    if (!state.purchases.length) {
+      box.innerHTML = '<div class="empty">Nenhuma compra neste cartão ainda.</div>';
+      return;
+    }
+    box.innerHTML = state.purchases.map((p) => {
+      const count = p.installments_count;
+      const open = p.remaining.count;
+      const paidCount = count - open;
+      const pct = count ? (paidCount / count) * 100 : 0;
+      const first = p.installments[0];
+      const interest = Number(p.interest_rate) > 0
+        ? `juros de ${Number(p.interest_rate).toFixed(2)}% ao mês (${money(p.interest_total)} no total)`
+        : 'sem juros';
+      return `<div class="purchase">
+        <div class="cat-line"><strong>${esc(p.description)}</strong><span>${count}x de ${money(first.amount)}</span></div>
+        <div class="muted">${p.category ? esc(p.category.name) + ' · ' : ''}${fmtDate(p.purchase_date)} · ${money(p.total_with_interest)} · ${interest}</div>
+        <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(pct)}" aria-label="Parcelas pagas">
+          <span class="ok-bg" style="width:${pct.toFixed(1)}%"></span>
+        </div>
+        <div class="cat-line">
+          <span class="muted">${paidCount} de ${count} pagas · restam ${money(p.remaining.amount)}</span>
+          <span class="actions">
+            <button type="button" class="small" data-prepay="${p.id}" ${open ? '' : 'disabled'}>Antecipar</button>
+            <button type="button" class="small danger" data-purchase-del="${p.id}">Excluir</button>
+          </span>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  /* ----- eventos da área de cartões ----- */
+  $('#card-tabs').addEventListener('click', async (event) => {
+    const id = event.target.dataset.cardId;
+    if (!id) return;
+    state.cardId = Number(id);
+    renderCardTabs();
+    try { await loadCardDetail(); } catch (err) { /* tratado em api() */ }
+  });
+
+  $('#invoice-month').addEventListener('change', async (event) => {
+    if (!event.target.value) return;
+    state.invoiceMonth = event.target.value;
+    try { await loadCardDetail(); } catch (err) { /* tratado em api() */ }
+  });
+
+  $('#card-summary').addEventListener('click', async (event) => {
+    const { cardEdit, cardDel } = event.target.dataset;
+    if (cardEdit) {
+      openCardDialog(currentCard());
+    } else if (cardDel) {
+      if (!confirm('Excluir este cartão?')) return;
+      try {
+        await api('/cards/' + state.cardId, { method: 'DELETE' });
+        state.cardId = null;
+        toast('Cartão excluído.');
+        await loadCards();
+      } catch (err) { alert(err.message); }
+    }
+  });
+
+  $('#purchases').addEventListener('click', async (event) => {
+    const { prepay, purchaseDel } = event.target.dataset;
+    if (prepay) {
+      openPrepay(state.purchases.find((p) => p.id === Number(prepay)));
+    } else if (purchaseDel) {
+      if (!confirm('Excluir esta compra e todas as suas parcelas?')) return;
+      try {
+        await api('/purchases/' + purchaseDel, { method: 'DELETE' });
+        toast('Compra excluída.');
+        await loadCards();
+      } catch (err) { alert(err.message); }
+    }
+  });
+
+  /* ----- cartão: criar e editar ----- */
+  function openCardDialog(card = null) {
+    state.editingCard = card;
+    $('#card-form').reset();
+    $('#cd-error').textContent = '';
+    $('#card-title').textContent = card ? 'Editar cartão' : 'Novo cartão';
+    if (card) {
+      $('#cd-name').value = card.name;
+      $('#cd-limit').value = Number(card.credit_limit);
+      $('#cd-closing').value = card.closing_day;
+      $('#cd-due').value = card.due_day;
+    }
+    $('#card-dialog').showModal();
+  }
+
+  $('#btn-new-card').onclick = () => openCardDialog();
+
+  $('#card-form').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const body = {
+      name: $('#cd-name').value.trim(),
+      credit_limit: Number($('#cd-limit').value),
+      closing_day: Number($('#cd-closing').value),
+      due_day: Number($('#cd-due').value),
+    };
+    const editing = state.editingCard;
+    try {
+      const res = await api(editing ? '/cards/' + editing.id : '/cards', {
+        method: editing ? 'PUT' : 'POST',
+        body,
+      });
+      state.cardId = res.data.id;
+      $('#card-dialog').close();
+      await loadCards();
+    } catch (err) {
+      $('#cd-error').textContent = err.message;
+    }
+  });
+
+  /* ----- compra parcelada com simulador ----- */
+  let simSeq = 0;
+  let simFits = false;
+
+  function updateSaveButton() {
+    $('#pu-save').disabled = !simFits || !$('#pu-category').value;
+  }
+
+  function simulationBody() {
+    return {
+      total_amount: Number($('#pu-total').value),
+      installments: Number($('#pu-count').value),
+      interest_rate: Number($('#pu-rate').value || 0),
+      purchase_date: $('#pu-date').value || undefined,
+    };
+  }
+
+  function renderSimulation(sim) {
+    const hasInterest = Number(sim.interest_total) > 0;
+    return `
+      <div class="sim-main">${sim.installments_count}x de <strong>${money(sim.installment_amount)}</strong></div>
+      <div class="muted">Total ${money(sim.total_with_interest)}${hasInterest
+        ? ` · juros de ${money(sim.interest_total)} (${Number(sim.interest_rate).toFixed(2)}% ao mês)`
+        : ' · sem juros'}</div>
+      <div class="muted">1ª parcela vence em ${fmtDate(sim.first_due_date)} · limite disponível ${money(sim.available_limit)}</div>
+      ${sim.fits_limit ? '' : '<div class="error">Esta compra não cabe no limite disponível do cartão.</div>'}
+      <details>
+        <summary>Ver todas as parcelas</summary>
+        <ul class="inst-list">${sim.installments.map((i) =>
+          `<li><span>${i.number}ª · vence ${fmtDate(i.due_date)}</span><strong>${money(i.amount)}</strong></li>`).join('')}</ul>
+      </details>`;
+  }
+
+  async function runSimulation() {
+    const box = $('#sim-box');
+    const body = simulationBody();
+
+    if (!(body.total_amount > 0) || !(body.installments >= 1)) {
+      simFits = false;
+      box.innerHTML = '<div class="muted">Informe o valor e as parcelas para ver a simulação.</div>';
+      updateSaveButton();
+      return;
+    }
+
+    const seq = ++simSeq;
+    try {
+      const sim = await api(`/cards/${state.cardId}/simulate`, { method: 'POST', body });
+      if (seq !== simSeq) return; // resposta antiga: já existe uma simulação mais recente
+      simFits = sim.fits_limit;
+      box.innerHTML = renderSimulation(sim);
+    } catch (err) {
+      if (seq !== simSeq) return;
+      simFits = false;
+      box.innerHTML = `<div class="error">${esc(err.message)}</div>`;
+    }
+    updateSaveButton();
+  }
+
+  const scheduleSimulation = debounce(runSimulation, 300);
+  ['#pu-total', '#pu-count', '#pu-rate', '#pu-date'].forEach((selector) => {
+    $(selector).addEventListener('input', () => { simFits = false; updateSaveButton(); scheduleSimulation(); });
+  });
+
+  $('#btn-new-purchase').onclick = () => {
+    $('#purchase-form').reset();
+    $('#pu-error').textContent = '';
+    $('#pu-date').value = today();
+    $('#pu-count').value = 1;
+    $('#pu-rate').value = 0;
+
+    const options = state.categories.filter((c) => c.type === 'expense');
+    $('#pu-category').innerHTML = options.map((c) => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
+    $('#pu-cat-hint').hidden = options.length > 0;
+
+    simFits = false;
+    $('#sim-box').innerHTML = '<div class="muted">Informe o valor e as parcelas para ver a simulação.</div>';
+    updateSaveButton();
+    $('#purchase-dialog').showModal();
+  };
+
+  $('#purchase-form').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const body = {
+      ...simulationBody(),
+      description: $('#pu-desc').value.trim(),
+      category_id: Number($('#pu-category').value),
+    };
+    $('#pu-save').disabled = true;
+    try {
+      await api(`/cards/${state.cardId}/purchases`, { method: 'POST', body });
+      $('#purchase-dialog').close();
+      toast('Compra registrada no cartão.');
+      await loadCards();
+    } catch (err) {
+      $('#pu-error').textContent = err.message;
+      $('#pu-save').disabled = false;
+    }
+  });
+
+  /* ----- antecipação de parcelas ----- */
+  let ppSeq = 0;
+
+  function selectedInstallments() {
+    return [...document.querySelectorAll('#pp-list input:checked')].map((input) => Number(input.dataset.n));
+  }
+
+  function openPrepay(purchase) {
+    state.prepay = { purchase };
+    $('#pp-title').textContent = `Antecipar parcelas: ${purchase.description}`;
+    $('#pp-date').value = today();
+    $('#pp-error').textContent = '';
+
+    const open = purchase.installments.filter((i) => i.status === 'open');
+    $('#pp-list').innerHTML = open.map((i) => `
+      <label class="pp-item">
+        <input type="checkbox" data-n="${i.number}">
+        <span>${i.number}ª · vence ${fmtDate(i.due_date)}</span>
+        <strong>${money(i.amount)}</strong>
+      </label>`).join('');
+
+    $('#pp-quote').innerHTML = '<div class="muted">Marque as parcelas que deseja antecipar.</div>';
+    $('#pp-confirm').disabled = true;
+    $('#prepay-dialog').showModal();
+  }
+
+  function renderQuote(q) {
+    const rows = q.installments.map((i) => `<tr>
+      <td>${i.number}ª · ${fmtDate(i.due_date)}</td>
+      <td>${i.days_early} d</td>
+      <td>${money(i.original_amount)}</td>
+      <td><strong>${money(i.amount_to_pay)}</strong></td>
+    </tr>`).join('');
+
+    const noInterest = Number(state.prepay.purchase.interest_rate) <= 0;
+    return `
+      <table class="pp-table">
+        <thead><tr><th>Parcela</th><th>Antecipa</th><th>Valor</th><th>A pagar</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div class="pp-totals">
+        <div><span>Valor das parcelas</span><span>${money(q.total_original)}</span></div>
+        <div><span>Total a pagar</span><strong>${money(q.total_to_pay)}</strong></div>
+        <div><span>Economia em juros</span><strong class="income">${money(q.total_savings)}</strong></div>
+      </div>
+      ${noInterest ? '<div class="muted" style="margin-top:8px">Esta compra não tem juros, então não há desconto, mas o limite do cartão é liberado.</div>' : ''}`;
+  }
+
+  async function quotePrepay() {
+    const numbers = selectedInstallments();
+    const box = $('#pp-quote');
+    $('#pp-confirm').disabled = true;
+    $('#pp-error').textContent = '';
+
+    if (!numbers.length) {
+      box.innerHTML = '<div class="muted">Marque as parcelas que deseja antecipar.</div>';
+      return;
+    }
+
+    const seq = ++ppSeq;
+    try {
+      const quote = await api(`/purchases/${state.prepay.purchase.id}/prepayments/simulate`, {
+        method: 'POST',
+        body: { numbers, payment_date: $('#pp-date').value || undefined },
+      });
+      if (seq !== ppSeq) return;
+      box.innerHTML = renderQuote(quote);
+      $('#pp-confirm').disabled = false;
+    } catch (err) {
+      if (seq !== ppSeq) return;
+      box.innerHTML = `<div class="error">${esc(err.message)}</div>`;
+    }
+  }
+
+  const scheduleQuote = debounce(quotePrepay, 250);
+  $('#pp-list').addEventListener('change', scheduleQuote);
+  $('#pp-date').addEventListener('input', scheduleQuote);
+
+  $('#pp-all').onclick = () => {
+    document.querySelectorAll('#pp-list input').forEach((input) => { input.checked = true; });
+    quotePrepay();
+  };
+  $('#pp-none').onclick = () => {
+    document.querySelectorAll('#pp-list input').forEach((input) => { input.checked = false; });
+    quotePrepay();
+  };
+
+  $('#pp-confirm').onclick = async () => {
+    const numbers = selectedInstallments();
+    if (!numbers.length) return;
+
+    $('#pp-confirm').disabled = true;
+    try {
+      const res = await api(`/purchases/${state.prepay.purchase.id}/prepayments`, {
+        method: 'POST',
+        body: { numbers, payment_date: $('#pp-date').value || undefined },
+      });
+      $('#prepay-dialog').close();
+      const savings = Number(res.total_savings);
+      toast(savings > 0
+        ? `Parcelas pagas. Você economizou ${money(savings)} em juros.`
+        : 'Parcelas pagas. Limite liberado.');
+      await loadCards();
+    } catch (err) {
+      $('#pp-error').textContent = err.message;
+      $('#pp-confirm').disabled = false;
+    }
+  };
 
   /* ---------- início ---------- */
   if (state.token) {
