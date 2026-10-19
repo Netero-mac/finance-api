@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BudgetController;
 use App\Http\Controllers\Api\CardInvoiceController;
+use App\Http\Controllers\Api\CardPrepaymentController;
 use App\Http\Controllers\Api\CardPurchaseController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\CreditCardController;
@@ -29,6 +30,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('cards.purchases', CardPurchaseController::class)
         ->shallow()
         ->only(['index', 'store', 'show', 'destroy']);
+
+    // Antecipação de parcelas
+    Route::post('/purchases/{purchase}/prepayments/simulate', [CardPrepaymentController::class, 'simulate']);
+    Route::post('/purchases/{purchase}/prepayments', [CardPrepaymentController::class, 'store']);
 
     Route::get('/summary', SummaryController::class);
 });

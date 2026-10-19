@@ -112,9 +112,16 @@ class CardPurchaseController extends Controller
         return CardPurchaseResource::make($purchase->load(['category', 'installments']));
     }
 
-    public function destroy(CardPurchase $purchase): Response
+    public function destroy(CardPurchase $purchase): Response|JsonResponse
     {
         Gate::authorize('delete', $purchase);
+
+        // Compra com parcelas já pagas tem histórico financeiro: não pode ser apagada.
+        if ($purchase->installments()->whereNotNull('paid_at')->exists()) {
+            return response()->json([
+                'message' => 'Não é possível excluir uma compra que já tem parcelas pagas.',
+            ], 409);
+        }
 
         // As parcelas são removidas em cascata, e o limite é liberado.
         $purchase->delete();

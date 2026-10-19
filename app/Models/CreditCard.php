@@ -50,12 +50,14 @@ class CreditCard extends Model
         return CardPurchasePlanner::toCents($this->credit_limit);
     }
 
-    /** Limite comprometido: soma de todas as parcelas em aberto do cartão. */
+    /** Limite comprometido: soma das parcelas ainda em aberto. Parcelas pagas liberam o limite. */
     public function usedCents(): int
     {
         // "installments_sum_amount" vem pronto quando a listagem usa withSum().
         $sum = $this->getAttribute('installments_sum_amount')
-            ?? $this->installments()->sum('card_installments.amount');
+            ?? $this->installments()
+                ->whereNull('card_installments.paid_at')
+                ->sum('card_installments.amount');
 
         return CardPurchasePlanner::toCents($sum);
     }

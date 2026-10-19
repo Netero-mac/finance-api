@@ -23,6 +23,17 @@ class CardPurchaseResource extends JsonResource
             'total_with_interest' => $this->total_with_interest,
             'interest_total' => CardPurchasePlanner::format($interestCents),
             'purchase_date' => $this->purchase_date->toDateString(),
+            // Parcelas ainda em aberto (valor nominal).
+            'remaining' => $this->whenLoaded('installments', function () {
+                $open = $this->installments->whereNull('paid_at');
+
+                return [
+                    'count' => $open->count(),
+                    'amount' => CardPurchasePlanner::format(
+                        $open->sum(fn ($item) => CardPurchasePlanner::toCents($item->amount))
+                    ),
+                ];
+            }),
             'installments' => CardInstallmentResource::collection($this->whenLoaded('installments')),
         ];
     }

@@ -15,6 +15,9 @@ class CardInstallmentResource extends JsonResource
             'amount' => $this->amount,
             'due_date' => $this->due_date->toDateString(),
             'invoice_month' => $this->invoice_month,
+            'status' => $this->isPaid() ? 'paid' : 'open',
+            'paid_amount' => $this->paid_amount,
+            'paid_at' => $this->paid_at?->toDateString(),
         ];
     }
 }

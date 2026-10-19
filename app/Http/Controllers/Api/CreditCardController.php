@@ -18,7 +18,8 @@ class CreditCardController extends Controller
     {
         $cards = $request->user()
             ->creditCards()
-            ->withSum('installments', 'amount') // limite usado, sem uma consulta por cartão
+            // Limite usado = parcelas em aberto, calculado sem uma consulta por cartão.
+            ->withSum(['installments' => fn ($query) => $query->whereNull('card_installments.paid_at')], 'amount')
             ->orderBy('name')
             ->get();
 
