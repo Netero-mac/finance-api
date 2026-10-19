@@ -2,7 +2,10 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BudgetController;
+use App\Http\Controllers\Api\CardInvoiceController;
+use App\Http\Controllers\Api\CardPurchaseController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\CreditCardController;
 use App\Http\Controllers\Api\SummaryController;
 use App\Http\Controllers\Api\TransactionController;
 use Illuminate\Http\Request;
@@ -18,6 +21,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('categories', CategoryController::class);
     Route::apiResource('transactions', TransactionController::class);
     Route::apiResource('budgets', BudgetController::class)->except('show');
+
+    // Cartão de crédito
+    Route::apiResource('cards', CreditCardController::class);
+    Route::post('/cards/{card}/simulate', [CardPurchaseController::class, 'simulate']);
+    Route::get('/cards/{card}/invoice', CardInvoiceController::class);
+    Route::apiResource('cards.purchases', CardPurchaseController::class)
+        ->shallow()
+        ->only(['index', 'store', 'show', 'destroy']);
 
     Route::get('/summary', SummaryController::class);
 });
