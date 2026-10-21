@@ -8,6 +8,8 @@ use App\Http\Requests\BudgetRequest;
 use App\Http\Resources\BudgetResource;
 use App\Models\Budget;
 use App\Models\User;
+use App\Services\CardPurchasePlanner;
+use App\Services\CardSpending;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -18,6 +20,10 @@ use Illuminate\Support\Facades\Gate;
 
 class BudgetController extends Controller
 {
+    public function __construct(private CardSpending $cardSpending)
+    {
+    }
+
     /**
      * Lista os orçamentos com o andamento do mês: GET /api/budgets?month=2026-10
      */
@@ -75,8 +81,8 @@ class BudgetController extends Controller
     }
 
     /**
-     * Soma as despesas do mês por categoria (uma consulta só) e
-     * anexa o valor gasto a cada orçamento.
+     * Soma as despesas do mês por categoria e anexa o valor gasto a cada orçamento.
+     * O gasto inclui as transações e as parcelas do cartão de crédito do mês.
      */
     private function withSpent(User $user, Collection $budgets, string $month): void
     {
@@ -93,8 +99,18 @@ class BudgetController extends Controller
             ->get()
             ->mapWithKeys(fn ($row) => [$row->category_id => $row->total]);
 
+        $cardByCategory = [];
+        foreach ($this->cardSpending->byCategory($user, $start, $end) as $row) {
+            if ($row['category_id'] !== null) {
+                $cardByCategory[$row['category_id']] = $row['cents'];
+            }
+        }
+
         foreach ($budgets as $budget) {
-            $budget->setAttribute('spent_amount', $spent[$budget->category_id] ?? 0);
+            $cents = CardPurchasePlanner::toCents($spent[$budget->category_id] ?? 0)
+                + ($cardByCategory[$budget->category_id] ?? 0);
+
+            $budget->setAttribute('spent_amount', $cents / 100);
         }
     }
 }

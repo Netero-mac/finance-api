@@ -104,7 +104,7 @@ class DatabaseSeeder extends Seeder
         $purchases = [
             ['Geladeira', 'Compras', 2400, 10, 2.0, $startOfMonth->copy()->subMonthsNoOverflow(2)->day(3)],
             ['Celular', 'Compras', 1800, 6, 0, $startOfMonth->copy()->subMonthsNoOverflow(1)->day(8)],
-            ['Fone de ouvido', 'Lazer', 360, 3, 0, $startOfMonth->copy()->day(2)],
+            ['Fone de ouvido', 'Compras', 360, 3, 0, $startOfMonth->copy()->day(2)],
         ];
 
         $created = [];

@@ -3,173 +3,193 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Finance | Controle financeiro</title>
+<title>Finance | Livro-caixa pessoal</title>
 <style>
+  /* Identidade: livro-caixa. Papel quente, tinta verde-escura, números em fonte monoespaçada. */
   :root {
-    --bg: #f5f6f8; --card: #ffffff; --text: #1c2430; --muted: #6b7686;
-    --border: #e3e7ee; --primary: #2f6fed; --primary-text: #ffffff;
-    --income: #168a52; --expense: #d4402f; --warning: #b7791f; --radius: 12px;
+    --paper: #f3eee3; --surface: #faf7f0; --ink: #22251f; --muted: #6f6a5d; --rule: #d8d0bf;
+    --accent: #1f4d3a; --accent-ink: #f7f3ea;
+    --income: #2c6e49; --expense: #a8412a; --warning: #a87412;
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, "Noto Serif", "DejaVu Serif", serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "DejaVu Sans Mono", Menlo, Consolas, monospace;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #10141b; --card: #181e28; --text: #e8ecf3; --muted: #98a3b5;
-      --border: #2a3342; --primary: #6c9bff; --primary-text: #0d1117;
-      --income: #3ecf8e; --expense: #ff7a6b; --warning: #f5b74a;
+      --paper: #161512; --surface: #1e1c18; --ink: #ece6d8; --muted: #a39d8c; --rule: #38352d;
+      --accent: #7fbf9f; --accent-ink: #12201a;
+      --income: #7fbf9f; --expense: #e08a72; --warning: #d9a441;
     }
   }
   * { box-sizing: border-box; }
   [hidden] { display: none !important; }
-  body {
-    margin: 0; background: var(--bg); color: var(--text);
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; line-height: 1.45;
-  }
-  h1, h2, h3 { margin: 0; }
-  h2 { font-size: 1.05rem; }
-  .container { max-width: 1040px; margin: 0 auto; padding: 20px 16px 48px; }
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; }
-  .muted { color: var(--muted); font-size: .9rem; }
-
-  /* formulários e botões */
-  label { display: block; font-size: .85rem; font-weight: 600; margin: 12px 0 4px; }
-  input, select {
-    width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border);
-    background: var(--bg); color: var(--text); font: inherit;
-  }
-  input[type=checkbox] { width: auto; }
-  input:focus, select:focus, button:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
-  button { font: inherit; cursor: pointer; border-radius: 8px; border: 1px solid var(--border); padding: 9px 14px; background: var(--card); color: var(--text); }
-  button.primary { background: var(--primary); color: var(--primary-text); border-color: var(--primary); font-weight: 600; }
-  button.link { border: none; background: none; color: var(--primary); padding: 0; }
-  button.danger { color: var(--expense); }
-  button.small { padding: 4px 9px; font-size: .85rem; }
-  button:disabled { opacity: .5; cursor: default; }
-  .error { color: var(--expense); font-size: .9rem; margin-top: 10px; min-height: 1.2em; }
-
-  /* login */
-  #auth-view { min-height: 100vh; display: grid; place-items: center; padding: 16px; }
-  #auth-view .card { width: min(380px, 100%); }
-  .tabs { display: flex; gap: 6px; margin: 14px 0 4px; }
-  .tabs button { flex: 1; }
-  .tabs button.active { background: var(--primary); color: var(--primary-text); border-color: var(--primary); }
-  #auth-submit { width: 100%; margin-top: 14px; }
-
-  /* topo */
-  header.top { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-  header.top .right { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-  header.top input[type=month] { width: auto; }
-  nav.views { display: flex; gap: 6px; margin-bottom: 18px; }
-  nav.views button.active { background: var(--primary); color: var(--primary-text); border-color: var(--primary); font-weight: 600; }
-
-  /* avisos de orçamento */
-  .alerts { display: grid; gap: 8px; margin-bottom: 16px; }
-  .alert { padding: 10px 14px; border-radius: 8px; border: 1px solid; font-size: .92rem; }
-  .alert.warning { border-color: var(--warning); background: color-mix(in srgb, var(--warning) 14%, transparent); }
-  .alert.exceeded { border-color: var(--expense); background: color-mix(in srgb, var(--expense) 14%, transparent); }
-
-  /* resumo */
-  .summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
-  .summary .value, .big { font-size: 1.6rem; font-weight: 700; margin-top: 4px; }
-  .summary .cmp { font-size: .8rem; color: var(--muted); margin-top: 2px; min-height: 1.2em; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); line-height: 1.5; }
+  h1, h2, h3 { margin: 0; font-family: var(--serif); }
+  .num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  .muted { color: var(--muted); font-size: .88rem; }
   .income { color: var(--income); } .expense { color: var(--expense); }
   .warning { color: var(--warning); } .exceeded { color: var(--expense); }
 
-  .charts, .grid { display: grid; gap: 16px; margin-bottom: 16px; }
-  .stack { display: grid; gap: 16px; }
-  @media (min-width: 860px) {
-    .charts { grid-template-columns: 1fr 1.2fr; }
-    .grid { grid-template-columns: 1fr 1.7fr; align-items: start; }
-    .grid.cards-grid { grid-template-columns: 1fr 1.3fr; }
-  }
-  @media (max-width: 640px) { .summary { grid-template-columns: 1fr; } }
+  .page { max-width: 1020px; margin: 0 auto; padding: 22px 20px 64px; }
 
-  .panel-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
-  .panel-head .links, .actions { display: flex; gap: 8px; align-items: center; }
+  /* cabeçalho */
+  .masthead { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--rule); flex-wrap: wrap; }
+  .brand { font-family: var(--serif); font-size: 1.9rem; font-weight: 700; letter-spacing: -.01em; line-height: 1; }
+  .tagline { font-family: var(--serif); font-style: italic; color: var(--muted); font-size: .95rem; margin-top: 4px; }
+  .who { font-size: .9rem; color: var(--muted); }
+  nav.views { display: flex; gap: 26px; margin: 4px 0 24px; border-bottom: 1px solid var(--rule); }
+  nav.views button { border: none; border-bottom: 3px solid transparent; border-radius: 0; background: none; padding: 10px 0 8px; margin-bottom: -1px; font-family: var(--serif); font-size: 1.1rem; color: var(--muted); }
+  nav.views button.active { color: var(--ink); border-bottom-color: var(--ink); font-weight: 700; }
+
+  /* botões e campos */
+  button { font: inherit; cursor: pointer; color: var(--ink); background: transparent; border: 1px solid var(--ink); border-radius: 2px; padding: 7px 14px; }
+  button:hover:not(:disabled) { background: color-mix(in srgb, var(--ink) 8%, transparent); }
+  button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+  button.primary:hover:not(:disabled) { background: color-mix(in srgb, var(--accent) 88%, black); }
+  button.link, button.small { border: none; background: none; padding: 0 2px; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--rule); }
+  button.small { font-size: .85rem; }
+  button.link:hover:not(:disabled), button.small:hover:not(:disabled) { background: none; text-decoration-color: currentColor; }
+  button.danger { color: var(--expense); }
+  button.small.primary { background: var(--accent); color: var(--accent-ink); padding: 3px 10px; text-decoration: none; }
+  button:disabled { opacity: .45; cursor: default; }
+  button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  label { display: block; font-size: .78rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); margin: 14px 0 4px; }
+  input, select { width: 100%; padding: 9px 10px; border: 1px solid var(--rule); border-radius: 2px; background: var(--surface); color: var(--ink); font: inherit; }
+  input[type=checkbox], input[type=radio] { width: auto; }
+  .error { color: var(--expense); font-size: .9rem; margin-top: 10px; min-height: 1.2em; }
+
+  /* login */
+  #auth-view { min-height: 100vh; display: grid; place-items: center; padding: 20px; }
+  .sheet { width: min(400px, 100%); background: var(--surface); border: 1px solid var(--ink); box-shadow: 6px 6px 0 var(--ink); padding: 28px 26px; }
+  .tabs { display: flex; gap: 18px; margin: 18px 0 2px; border-bottom: 1px solid var(--rule); }
+  .tabs button { border: none; border-bottom: 3px solid transparent; border-radius: 0; background: none; padding: 6px 0; margin-bottom: -1px; font-family: var(--serif); font-size: 1.05rem; color: var(--muted); }
+  .tabs button.active { color: var(--ink); border-bottom-color: var(--ink); font-weight: 700; }
+  #auth-submit { width: 100%; margin-top: 18px; padding: 10px; }
+
+  /* seção e títulos */
+  .panel { border-top: 2px solid var(--ink); padding-top: 12px; margin-bottom: 32px; }
+  .panel h2 { font-size: 1.3rem; }
+  .panel-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+  .acts, .links { display: flex; gap: 12px; align-items: baseline; }
+  .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+  .month-nav { display: flex; align-items: center; gap: 6px; }
+  .month-nav button { padding: 5px 10px; }
+  .month-nav input { width: auto; font-family: var(--serif); font-size: 1.05rem; }
+
+  /* avisos de orçamento: notas na margem */
+  .alerts { margin-bottom: 22px; }
+  .note-alert { border-left: 3px solid; padding: 3px 0 3px 12px; margin-bottom: 8px; font-size: .95rem; }
+  .note-alert.warning { border-color: var(--warning); }
+  .note-alert.exceeded { border-color: var(--expense); }
+
+  /* resumo em colunas de livro-razão */
+  .ledger { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 2px solid var(--ink); border-bottom: 1px solid var(--rule); margin-bottom: 32px; }
+  .cell { padding: 14px 20px 14px 22px; border-left: 1px solid var(--rule); }
+  .cell:first-child { border-left: none; padding-left: 0; }
+  .cell .label { font-size: .78rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+  .figure { font-family: var(--serif); font-size: 2.1rem; font-weight: 700; line-height: 1.15; margin: 4px 0 2px; font-variant-numeric: lining-nums tabular-nums; }
+  .cmp { font-size: .8rem; color: var(--muted); min-height: 1.2em; }
+
+  .two { display: grid; gap: 40px; }
+  @media (min-width: 900px) {
+    .two.charts { grid-template-columns: 1fr 1.2fr; }
+    .two.main { grid-template-columns: 1fr 1.6fr; align-items: start; }
+    .two.cards { grid-template-columns: 1fr 1.25fr; align-items: start; }
+  }
+  @media (max-width: 640px) {
+    .ledger { grid-template-columns: 1fr; }
+    .cell, .cell:first-child { border-left: none; padding-left: 0; border-top: 1px solid var(--rule); }
+    .cell:first-child { border-top: none; }
+  }
 
   /* gráficos */
-  .donut-wrap { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
-  .donut-wrap svg { width: 170px; height: 170px; flex: none; }
-  .donut-label { font-size: 2.6px; fill: var(--muted); }
-  .donut-value { font-size: 3px; font-weight: 700; fill: var(--text); }
-  .legend { list-style: none; margin: 0; padding: 0; flex: 1; min-width: 180px; }
-  .legend li { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: .9rem; }
+  .donut-wrap { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+  .donut-wrap svg { width: 160px; height: 160px; flex: none; }
+  .donut-label { font-size: 2.4px; fill: var(--muted); font-family: var(--sans); }
+  .donut-value { font-size: 3px; font-weight: 700; fill: var(--ink); font-family: var(--mono); }
+  .legend { list-style: none; margin: 0; padding: 0; flex: 1; min-width: 190px; }
+  .legend li { display: flex; align-items: baseline; gap: 8px; padding: 4px 0; font-size: .9rem; border-bottom: 1px dotted var(--rule); }
   .legend .lg-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex: none; }
+  .swatch { display: inline-block; width: 10px; height: 10px; flex: none; }
   #bars svg { width: 100%; height: auto; }
-  .axis { font-size: 11px; fill: var(--muted); }
-  .chart-legend { display: flex; gap: 14px; justify-content: center; font-size: .85rem; color: var(--muted); margin-top: 6px; }
+  .axis { font-size: 10.5px; fill: var(--muted); font-family: var(--mono); }
+  .chart-legend { display: flex; gap: 16px; justify-content: center; font-size: .82rem; color: var(--muted); margin-top: 6px; }
 
-  /* barras de progresso */
-  .cat-item, .budget, .purchase { margin-bottom: 14px; }
-  .cat-line { display: flex; justify-content: space-between; align-items: center; font-size: .92rem; gap: 8px; }
-  .bar { height: 8px; border-radius: 99px; background: var(--border); overflow: hidden; margin: 5px 0; }
-  .bar > span { display: block; height: 100%; border-radius: 99px; }
+  /* itens com barra de progresso */
+  .item { margin-bottom: 18px; }
+  .line { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; font-size: .95rem; }
+  .bar { height: 5px; background: var(--rule); margin: 6px 0 5px; }
+  .bar > span { display: block; height: 100%; }
   .bar .income-bg, .bar .ok-bg { background: var(--income); }
   .bar .expense-bg, .bar .exceeded-bg { background: var(--expense); }
   .bar .warning-bg { background: var(--warning); }
-  .budget .note { font-size: .85rem; }
-  .budget .note.ok { color: var(--muted); }
+  .note { font-size: .85rem; }
+  .note.ok { color: var(--muted); }
 
-  /* transações e itens de fatura */
-  .filters { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
-  .filters select { width: auto; flex: 1; min-width: 120px; }
-  .tx { display: flex; align-items: center; gap: 8px; padding: 11px 0; border-top: 1px solid var(--border); }
-  .tx:first-of-type { border-top: none; }
-  .tx .info { flex: 1; min-width: 0; }
+  /* linhas de lançamento */
+  .filters { display: flex; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
+  .filters select { width: auto; flex: 1; min-width: 130px; }
+  .tx { display: grid; grid-template-columns: 3.4rem 1fr auto auto; gap: 12px; align-items: baseline; padding: 10px 0; border-top: 1px dotted var(--rule); }
+  .tx:first-child { border-top: none; }
+  .tx .date { color: var(--muted); font-size: .85rem; }
   .tx .desc { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .tx .amount { font-weight: 700; white-space: nowrap; }
-  .pager { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; }
-  .empty { text-align: center; padding: 20px 8px; color: var(--muted); }
+  .tx .amount { font-weight: 600; white-space: nowrap; }
+  .pager { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; }
+  .empty { text-align: center; padding: 22px 8px; color: var(--muted); font-family: var(--serif); font-style: italic; }
+  .stamp { display: inline-block; font-size: .66rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--income); border: 1.5px solid var(--income); padding: 0 5px; margin-right: 8px; transform: rotate(-3deg); }
 
   /* cartões */
-  .card-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
-  .card-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
-  .card-tabs button.active { border-color: var(--primary); color: var(--primary); font-weight: 600; }
-  .limit-line { display: flex; justify-content: space-between; font-size: .95rem; margin-top: 6px; }
-  .badge-paid { font-size: .72rem; padding: 2px 8px; border-radius: 99px; border: 1px solid var(--income); color: var(--income); margin-right: 6px; }
-  .purchase { padding-bottom: 14px; border-bottom: 1px solid var(--border); }
-  .purchase:last-child { border-bottom: none; margin-bottom: 0; }
+  .card-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 22px; }
+  .card-tabs { display: flex; gap: 10px; flex-wrap: wrap; }
+  .card-tabs button { border-color: var(--rule); }
+  .card-tabs button.active { border-color: var(--ink); background: var(--ink); color: var(--paper); }
+  .limit-line { display: flex; justify-content: space-between; align-items: baseline; font-size: .95rem; }
+  .invoice-total { font-family: var(--serif); font-size: 2rem; font-weight: 700; font-variant-numeric: lining-nums tabular-nums; line-height: 1.15; }
+  .purchase { padding-bottom: 16px; border-bottom: 1px dotted var(--rule); }
+  .purchase:last-child { border-bottom: none; }
 
   /* simulador e antecipação */
-  .sim-box, .quote-box { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-top: 14px; min-height: 64px; }
-  .sim-main { font-size: 1.15rem; margin-bottom: 4px; }
+  .sim-box, .quote-box { border: 1px dashed var(--muted); padding: 12px 14px; margin-top: 16px; min-height: 66px; }
+  .sim-main { font-family: var(--serif); font-size: 1.25rem; margin-bottom: 4px; }
   .inst-list { list-style: none; margin: 8px 0 0; padding: 0; max-height: 200px; overflow-y: auto; }
-  .inst-list li { display: flex; justify-content: space-between; padding: 3px 0; font-size: .9rem; }
-  details summary { cursor: pointer; color: var(--primary); font-size: .9rem; margin-top: 6px; }
-  .pp-list { max-height: 220px; overflow-y: auto; margin-top: 8px; border: 1px solid var(--border); border-radius: 8px; padding: 4px 10px; }
-  .pp-item { display: flex; align-items: center; gap: 10px; margin: 0; padding: 7px 0; font-weight: 400; border-top: 1px solid var(--border); cursor: pointer; }
+  .inst-list li { display: flex; justify-content: space-between; padding: 3px 0; font-size: .9rem; border-bottom: 1px dotted var(--rule); }
+  details summary { cursor: pointer; font-size: .88rem; margin-top: 8px; text-decoration: underline; text-underline-offset: 3px; }
+  .pp-list { max-height: 220px; overflow-y: auto; margin-top: 10px; border: 1px solid var(--rule); padding: 2px 12px; background: var(--surface); }
+  .pp-item { display: flex; align-items: center; gap: 10px; margin: 0; padding: 8px 0; font-size: .95rem; font-weight: 400; letter-spacing: 0; text-transform: none; color: var(--ink); border-top: 1px dotted var(--rule); cursor: pointer; }
   .pp-item:first-child { border-top: none; }
   .pp-item span { flex: 1; }
   .pp-table { width: 100%; border-collapse: collapse; font-size: .88rem; }
   .pp-table th, .pp-table td { text-align: right; padding: 4px 4px; }
   .pp-table th:first-child, .pp-table td:first-child { text-align: left; }
-  .pp-table th { color: var(--muted); font-weight: 600; }
-  .pp-totals { margin-top: 10px; display: grid; gap: 2px; font-size: .95rem; }
+  .pp-table th { color: var(--muted); font-weight: 600; font-size: .75rem; text-transform: uppercase; letter-spacing: .05em; }
+  .pp-table td:not(:first-child) { font-family: var(--mono); }
+  .pp-totals { margin-top: 12px; display: grid; gap: 3px; font-size: .95rem; border-top: 1px solid var(--ink); padding-top: 8px; }
   .pp-totals div { display: flex; justify-content: space-between; }
-  .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 10px 18px; border-radius: 99px; font-size: .92rem; z-index: 50; max-width: 90vw; }
+  .toast { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); background: var(--ink); color: var(--paper); padding: 10px 18px; font-size: .92rem; z-index: 50; max-width: 90vw; }
 
-  /* diálogos */
-  dialog { border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); color: var(--text); padding: 20px; width: min(440px, 92vw); max-height: 92vh; overflow-y: auto; }
+  /* diálogos: folha de formulário */
+  dialog { border: 1px solid var(--ink); box-shadow: 6px 6px 0 var(--ink); border-radius: 0; background: var(--surface); color: var(--ink); padding: 22px 24px; width: min(440px, 92vw); max-height: 92vh; overflow-y: auto; }
   dialog.wide { width: min(560px, 94vw); }
-  dialog::backdrop { background: rgba(0, 0, 0, .45); }
-  .row { display: flex; gap: 8px; } .row > * { flex: 1; }
-  .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
-  .type-switch label { display: flex; align-items: center; gap: 6px; font-weight: 500; margin: 0; padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; }
-  .type-switch input { width: auto; }
-  .cat-row { display: flex; align-items: center; gap: 8px; padding: 9px 0; border-top: 1px solid var(--border); }
+  dialog::backdrop { background: rgba(22, 21, 18, .55); }
+  dialog h2 { font-size: 1.4rem; margin-bottom: 4px; }
+  .row { display: flex; gap: 10px; } .row > * { flex: 1; }
+  .dialog-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+  .type-switch label { display: flex; align-items: center; gap: 8px; margin: 0; padding: 8px 12px; border: 1px solid var(--rule); font-size: .92rem; font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--ink); cursor: pointer; background: var(--surface); }
+  .cat-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-top: 1px dotted var(--rule); }
   .cat-row:first-child { border-top: none; }
   .cat-row .cat-name { flex: 1; min-width: 0; }
   .cat-row input { flex: 1; padding: 6px 10px; }
-  .badge { font-size: .72rem; padding: 2px 8px; border-radius: 99px; border: 1px solid var(--border); margin-left: 6px; color: var(--muted); }
+  .badge { font-size: .7rem; padding: 1px 7px; border: 1px solid var(--rule); margin-left: 8px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
   #cats-list { max-height: 50vh; overflow-y: auto; margin-top: 10px; }
 </style>
 </head>
 <body>
 
-<!-- Tela de login e cadastro -->
+<!-- Entrada -->
 <div id="auth-view" hidden>
-  <div class="card">
-    <h1>Finance</h1>
-    <p class="muted">Controle financeiro pessoal</p>
+  <div class="sheet">
+    <div class="brand">Finance</div>
+    <div class="tagline">livro-caixa pessoal</div>
     <div class="tabs">
       <button type="button" id="tab-login" class="active">Entrar</button>
       <button type="button" id="tab-register">Criar conta</button>
@@ -191,19 +211,13 @@
 
 <!-- Aplicativo -->
 <div id="app-view" hidden>
-  <div class="container">
-    <header class="top">
+  <div class="page">
+    <header class="masthead">
       <div>
-        <h1>Finance</h1>
-        <div class="muted">Olá, <span id="user-name"></span></div>
+        <div class="brand">Finance</div>
+        <div class="tagline">livro-caixa pessoal</div>
       </div>
-      <div class="right">
-        <span class="right" id="dash-actions">
-          <input type="month" id="month" aria-label="Mês">
-          <button class="primary" type="button" id="btn-new-tx">+ Nova transação</button>
-        </span>
-        <button type="button" id="btn-logout">Sair</button>
-      </div>
+      <div class="who"><span id="user-name"></span> &middot; <button class="link" type="button" id="btn-logout">Sair</button></div>
     </header>
 
     <nav class="views" aria-label="Seções">
@@ -213,49 +227,58 @@
 
     <!-- Painel -->
     <div id="dashboard-view">
+      <div class="toolbar">
+        <div class="month-nav">
+          <button type="button" id="month-prev" aria-label="Mês anterior">&larr;</button>
+          <input type="month" id="month" aria-label="Mês">
+          <button type="button" id="month-next" aria-label="Próximo mês">&rarr;</button>
+        </div>
+        <button class="primary" type="button" id="btn-new-tx">Lançar transação</button>
+      </div>
+
       <div class="alerts" id="alerts"></div>
 
-      <section class="summary">
-        <div class="card"><div class="muted">Receitas</div><div class="value income" id="sum-income">R$ 0,00</div><div class="cmp" id="cmp-income"></div></div>
-        <div class="card"><div class="muted">Despesas</div><div class="value expense" id="sum-expense">R$ 0,00</div><div class="cmp" id="cmp-expense"></div></div>
-        <div class="card"><div class="muted">Saldo</div><div class="value" id="sum-balance">R$ 0,00</div><div class="cmp" id="cmp-balance"></div></div>
+      <section class="ledger">
+        <div class="cell"><div class="label">Receitas</div><div class="figure income" id="sum-income">R$ 0,00</div><div class="cmp" id="cmp-income"></div></div>
+        <div class="cell"><div class="label">Despesas</div><div class="figure expense" id="sum-expense">R$ 0,00</div><div class="cmp" id="cmp-expense"></div><div class="cmp" id="card-note"></div></div>
+        <div class="cell"><div class="label">Saldo</div><div class="figure" id="sum-balance">R$ 0,00</div><div class="cmp" id="cmp-balance"></div></div>
       </section>
 
-      <section class="charts">
-        <div class="card">
-          <div class="panel-head"><h2>Despesas por categoria</h2></div>
+      <div class="two charts">
+        <section class="panel">
+          <div class="panel-head"><h2>Para onde foi o dinheiro</h2></div>
           <div id="donut"></div>
-        </div>
-        <div class="card">
-          <div class="panel-head"><h2>Últimos 6 meses</h2></div>
+        </section>
+        <section class="panel">
+          <div class="panel-head"><h2>Últimos seis meses</h2></div>
           <div id="bars"></div>
-        </div>
-      </section>
+        </section>
+      </div>
 
-      <div class="grid">
-        <div class="stack">
-          <section class="card">
+      <div class="two main">
+        <div>
+          <section class="panel">
             <div class="panel-head">
               <h2>Orçamentos <span class="muted" id="budget-month"></span></h2>
-              <button class="link" type="button" id="btn-new-budget">+ Novo</button>
+              <button class="link" type="button" id="btn-new-budget">Novo orçamento</button>
             </div>
             <div id="budgets"></div>
           </section>
 
-          <section class="card">
+          <section class="panel">
             <div class="panel-head">
-              <h2>Por categoria</h2>
+              <h2>Gastos por categoria</h2>
               <div class="links">
                 <button class="link" type="button" id="btn-manage-cats">Gerenciar</button>
-                <button class="link" type="button" id="btn-new-cat">+ Nova</button>
+                <button class="link" type="button" id="btn-new-cat">Nova</button>
               </div>
             </div>
             <div id="by-category"></div>
           </section>
         </div>
 
-        <section class="card">
-          <div class="panel-head"><h2>Transações</h2><span class="muted" id="tx-total"></span></div>
+        <section class="panel">
+          <div class="panel-head"><h2>Lançamentos</h2><span class="muted" id="tx-total"></span></div>
           <div class="filters">
             <select id="filter-type" aria-label="Filtrar por tipo">
               <option value="">Todos os tipos</option>
@@ -278,16 +301,16 @@
     <div id="cards-view" hidden>
       <div class="card-toolbar">
         <div class="card-tabs" id="card-tabs"></div>
-        <button class="primary" type="button" id="btn-new-card">+ Novo cartão</button>
+        <button class="primary" type="button" id="btn-new-card">Novo cartão</button>
       </div>
 
-      <div class="card empty" id="card-empty" hidden>Nenhum cartão cadastrado. Crie o primeiro para registrar compras parceladas.</div>
+      <div class="empty" id="card-empty" hidden>Nenhum cartão cadastrado. Crie o primeiro para registrar compras parceladas.</div>
 
       <div id="card-detail" hidden>
-        <section class="card" id="card-summary" style="margin-bottom:16px"></section>
+        <section class="panel" id="card-summary"></section>
 
-        <div class="grid cards-grid">
-          <section class="card">
+        <div class="two cards">
+          <section class="panel">
             <div class="panel-head">
               <h2>Fatura</h2>
               <input type="month" id="invoice-month" aria-label="Mês da fatura" style="width:auto">
@@ -295,10 +318,10 @@
             <div id="invoice"></div>
           </section>
 
-          <section class="card">
+          <section class="panel">
             <div class="panel-head">
               <h2>Compras parceladas</h2>
-              <button class="link" type="button" id="btn-new-purchase">+ Nova compra</button>
+              <button class="link" type="button" id="btn-new-purchase">Nova compra</button>
             </div>
             <div id="purchases"></div>
           </section>
@@ -345,7 +368,7 @@
     <div class="muted" id="budget-hint" hidden>Todas as suas categorias de despesa já têm orçamento. Crie uma nova categoria para adicionar outro.</div>
     <label for="budget-amount">Limite mensal (R$)</label>
     <input id="budget-amount" type="number" step="0.01" min="0.01" required>
-    <div class="muted">Você será avisado ao passar de 80% do limite e quando ele for ultrapassado.</div>
+    <div class="muted" style="margin-top:8px">Você é avisado ao passar de 80% do limite e quando ele for ultrapassado. Compras no cartão entram na conta.</div>
     <div class="error" id="budget-error" role="alert"></div>
     <div class="dialog-actions">
       <button type="button" data-close>Cancelar</button>
@@ -396,7 +419,7 @@
       <div><label for="cd-closing">Dia de fechamento</label><input id="cd-closing" type="number" min="1" max="28" required></div>
       <div><label for="cd-due">Dia de vencimento</label><input id="cd-due" type="number" min="1" max="28" required></div>
     </div>
-    <div class="muted">Dias de 1 a 28. Compras feitas até o dia de fechamento entram na fatura que fecha naquele mês.</div>
+    <div class="muted" style="margin-top:8px">Dias de 1 a 28. Compras feitas até o dia de fechamento entram na fatura que fecha naquele mês.</div>
     <div class="error" id="cd-error" role="alert"></div>
     <div class="dialog-actions">
       <button type="button" data-close>Cancelar</button>
@@ -422,7 +445,7 @@
       <div><label for="pu-rate">Juros ao mês (%)</label><input id="pu-rate" type="number" step="0.01" min="0" max="30" value="0"></div>
       <div><label for="pu-date">Data da compra</label><input id="pu-date" type="date" required></div>
     </div>
-    <div class="muted">Deixe os juros em 0 para parcelar sem juros.</div>
+    <div class="muted" style="margin-top:8px">Deixe os juros em 0 para parcelar sem juros.</div>
     <div class="sim-box" id="sim-box"><div class="muted">Informe o valor e as parcelas para ver a simulação.</div></div>
     <div class="error" id="pu-error" role="alert"></div>
     <div class="dialog-actions">
@@ -436,7 +459,7 @@
 <dialog id="prepay-dialog" class="wide">
   <h2 id="pp-title">Antecipar parcelas</h2>
   <div class="muted">Marque as parcelas que deseja pagar antes do vencimento. Os juros são reduzidos proporcionalmente.</div>
-  <div class="actions" style="margin-top:12px">
+  <div class="acts" style="margin-top:12px">
     <button type="button" class="small" id="pp-all">Marcar todas</button>
     <button type="button" class="small" id="pp-none">Limpar</button>
   </div>
@@ -460,8 +483,10 @@
   const esc = (text) => String(text).replace(/[&<>"']/g, (c) =>
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const fmtDate = (iso) => iso.split('-').reverse().join('/');
+  const fmtShort = (iso) => `${iso.slice(8, 10)}/${iso.slice(5, 7)}`;
   const today = () => new Date().toLocaleDateString('sv-SE'); // AAAA-MM-DD no fuso local
-  const PALETTE = ['#2f6fed', '#e5484d', '#f5a524', '#17a673', '#8e4ec6', '#0ea5b7', '#d6409f', '#7c8798'];
+  // Paleta terrosa, em harmonia com o papel.
+  const PALETTE = ['#1f4d3a', '#a8412a', '#c79a2b', '#4f7391', '#7d5a7a', '#6b8f71', '#8f5a2e', '#8a8478'];
 
   const debounce = (fn, ms) => {
     let timer;
@@ -551,7 +576,6 @@
     state.view = view;
     $('#dashboard-view').hidden = view !== 'dashboard';
     $('#cards-view').hidden = view !== 'cards';
-    $('#dash-actions').hidden = view !== 'dashboard';
     document.querySelectorAll('[data-view]').forEach((btn) => {
       btn.classList.toggle('active', btn.dataset.view === view);
     });
@@ -625,9 +649,12 @@
     $('#sum-income').textContent = money(s.income);
     $('#sum-expense').textContent = money(s.expense);
 
+    // O resumo já inclui as parcelas do cartão; mostramos quanto veio dele.
+    $('#card-note').textContent = Number(s.card_expense) > 0 ? `inclui ${money(s.card_expense)} do cartão` : '';
+
     const balance = $('#sum-balance');
     balance.textContent = money(s.balance);
-    balance.className = 'value ' + (Number(s.balance) < 0 ? 'expense' : 'income');
+    balance.className = 'figure ' + (Number(s.balance) < 0 ? 'expense' : 'income');
 
     renderByCategory(s);
     renderDonut(s);
@@ -643,9 +670,12 @@
       const base = Number(item.type === 'income' ? s.income : s.expense) || 1;
       const pct = Math.min(100, (Number(item.total) / base) * 100);
       const cls = item.type === 'income' ? 'income' : 'expense';
-      return `<div class="cat-item">
-        <div class="cat-line"><span>${esc(item.category)}</span><strong class="${cls}">${money(item.total)}</strong></div>
+      const card = Number(item.card) > 0
+        ? `<div class="muted">${money(item.card)} no cartão</div>` : '';
+      return `<div class="item">
+        <div class="line"><span>${esc(item.category)}</span><strong class="num ${cls}">${money(item.total)}</strong></div>
         <div class="bar"><span class="${cls}-bg" style="width:${pct.toFixed(1)}%"></span></div>
+        ${card}
       </div>`;
     }).join('');
   }
@@ -656,7 +686,7 @@
     state.budgets = res.data;
 
     const [year, month] = state.month.split('-').map(Number);
-    $('#budget-month').textContent = new Date(year, month - 1, 1)
+    $('#budget-month').textContent = '· ' + new Date(year, month - 1, 1)
       .toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
 
     renderBudgets();
@@ -676,14 +706,14 @@
       const note = remaining < 0
         ? `Estourou em ${money(Math.abs(remaining))}`
         : `Restam ${money(remaining)}`;
-      return `<div class="budget">
-        <div class="cat-line"><strong>${esc(b.category.name)}</strong><span class="muted">${money(b.spent)} de ${money(b.amount)}</span></div>
+      return `<div class="item">
+        <div class="line"><strong>${esc(b.category.name)}</strong><span class="num muted">${money(b.spent)} de ${money(b.amount)}</span></div>
         <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(width)}" aria-label="Orçamento de ${esc(b.category.name)}">
           <span class="${b.status}-bg" style="width:${width.toFixed(1)}%"></span>
         </div>
-        <div class="cat-line">
+        <div class="line">
           <span class="note ${b.status}">${percent.toFixed(0)}% · ${note}</span>
-          <span class="actions">
+          <span class="acts">
             <button type="button" class="small" data-budget-edit="${b.id}">Editar</button>
             <button type="button" class="small danger" data-budget-del="${b.id}">Excluir</button>
           </span>
@@ -701,9 +731,9 @@
         const name = `<strong>${esc(b.category.name)}</strong>`;
         const percent = Number(b.percent).toFixed(0);
         if (b.status === 'exceeded') {
-          return `<div class="alert exceeded" role="alert">${name}: orçamento estourado em ${money(Math.abs(Number(b.remaining)))} (${percent}% do limite).</div>`;
+          return `<div class="note-alert exceeded" role="alert">${name}: orçamento estourado em ${money(Math.abs(Number(b.remaining)))} (${percent}% do limite).</div>`;
         }
-        return `<div class="alert warning" role="alert">${name}: ${percent}% do orçamento usado. Restam ${money(b.remaining)}.</div>`;
+        return `<div class="note-alert warning" role="alert">${name}: ${percent}% do orçamento usado. Restam ${money(b.remaining)}.</div>`;
       });
     $('#alerts').innerHTML = items.join('');
   }
@@ -778,23 +808,23 @@
     const rings = items.map((item, i) => {
       const pct = (Number(item.total) / total) * 100;
       const ring = `<circle cx="21" cy="21" r="15.9155" fill="none" stroke="${PALETTE[i % PALETTE.length]}"
-        stroke-width="6" stroke-dasharray="${pct.toFixed(3)} ${(100 - pct).toFixed(3)}"
+        stroke-width="4.5" stroke-dasharray="${pct.toFixed(3)} ${(100 - pct).toFixed(3)}"
         stroke-dashoffset="${offset.toFixed(3)}"><title>${esc(item.category)}: ${money(item.total)}</title></circle>`;
       offset -= pct;
       return ring;
     }).join('');
 
     const legend = items.map((item, i) => `<li>
-      <span class="dot" style="background:${PALETTE[i % PALETTE.length]}"></span>
+      <span class="swatch" style="background:${PALETTE[i % PALETTE.length]}"></span>
       <span class="lg-name">${esc(item.category)}</span>
-      <strong>${money(item.total)}</strong>
-      <span class="muted">${((Number(item.total) / total) * 100).toFixed(0)}%</span>
+      <strong class="num">${money(item.total)}</strong>
+      <span class="muted num">${((Number(item.total) / total) * 100).toFixed(0)}%</span>
     </li>`).join('');
 
     box.innerHTML = `<div class="donut-wrap">
       <svg viewBox="0 0 42 42" role="img" aria-label="Despesas por categoria">
         ${rings}
-        <text x="21" y="20.5" text-anchor="middle" class="donut-label">Total</text>
+        <text x="21" y="20.5" text-anchor="middle" class="donut-label">total</text>
         <text x="21" y="25" text-anchor="middle" class="donut-value">${money(total)}</text>
       </svg>
       <ul class="legend">${legend}</ul>
@@ -831,19 +861,19 @@
       const label = new Date(year, mo - 1, 1).toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '');
       const weight = m === state.month ? 'font-weight:700' : '';
       return `<g>
-        <rect x="${x - barW - 1}" y="${base - inc}" width="${barW}" height="${inc}" rx="2" style="fill:var(--income)"><title>Receitas (${label}): ${money(data[i].income)}</title></rect>
-        <rect x="${x + 1}" y="${base - exp}" width="${barW}" height="${exp}" rx="2" style="fill:var(--expense)"><title>Despesas (${label}): ${money(data[i].expense)}</title></rect>
+        <rect x="${x - barW - 1}" y="${base - inc}" width="${barW}" height="${inc}" style="fill:var(--income)"><title>Receitas (${label}): ${money(data[i].income)}</title></rect>
+        <rect x="${x + 1}" y="${base - exp}" width="${barW}" height="${exp}" style="fill:var(--expense)"><title>Despesas (${label}): ${money(data[i].expense)}</title></rect>
         <text x="${x}" y="${base + 16}" text-anchor="middle" class="axis" style="${weight}">${label}</text>
       </g>`;
     }).join('');
 
     $('#bars').innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Receitas e despesas dos últimos 6 meses">
-        <line x1="0" y1="${base}" x2="${W}" y2="${base}" style="stroke:var(--border)"></line>
+        <line x1="0" y1="${base}" x2="${W}" y2="${base}" style="stroke:var(--ink)"></line>
         ${groups}
       </svg>
       <div class="chart-legend">
-        <span><i class="dot" style="background:var(--income)"></i> Receitas</span>
-        <span><i class="dot" style="background:var(--expense)"></i> Despesas</span>
+        <span><i class="swatch" style="background:var(--income)"></i> Receitas</span>
+        <span><i class="swatch" style="background:var(--expense)"></i> Despesas</span>
       </div>`;
   }
 
@@ -861,7 +891,7 @@
     $('#cmp-balance').textContent = 'mês anterior: ' + money(previous.balance);
   }
 
-  /* ---------- transações ---------- */
+  /* ---------- lançamentos ---------- */
   async function loadTransactions() {
     const [year, month] = state.month.split('-').map(Number);
     const lastDay = String(new Date(year, month, 0).getDate()).padStart(2, '0');
@@ -876,18 +906,21 @@
     const list = $('#tx-list');
 
     if (!res.data.length) {
-      list.innerHTML = '<div class="empty">Nenhuma transação encontrada.</div>';
+      list.innerHTML = '<div class="empty">Nenhum lançamento encontrado.</div>';
     } else {
       list.innerHTML = res.data.map((t) => {
         const income = t.type === 'income';
         return `<div class="tx">
+          <span class="date num">${fmtShort(t.date)}</span>
           <div class="info">
             <div class="desc">${esc(t.description)}</div>
-            <div class="muted">${esc(t.category.name)} · ${fmtDate(t.date)}</div>
+            <div class="muted">${esc(t.category.name)}</div>
           </div>
-          <div class="amount ${income ? 'income' : 'expense'}">${income ? '+' : '-'} ${money(t.amount)}</div>
-          <button type="button" class="small" data-edit="${t.id}" aria-label="Editar ${esc(t.description)}">Editar</button>
-          <button type="button" class="small danger" data-delete="${t.id}" aria-label="Excluir ${esc(t.description)}">Excluir</button>
+          <span class="amount num ${income ? 'income' : 'expense'}">${income ? '+' : '−'} ${money(t.amount)}</span>
+          <span class="acts">
+            <button type="button" class="small" data-edit="${t.id}" aria-label="Editar ${esc(t.description)}">Editar</button>
+            <button type="button" class="small danger" data-delete="${t.id}" aria-label="Excluir ${esc(t.description)}">Excluir</button>
+          </span>
         </div>`;
       }).join('');
     }
@@ -899,12 +932,21 @@
   }
 
   /* ---------- eventos do painel ---------- */
-  $('#month').addEventListener('change', (e) => {
-    if (!e.target.value) return;
-    state.month = e.target.value;
+  function setMonth(value) {
+    state.month = value;
+    $('#month').value = value;
     state.page = 1;
     loadAll();
-  });
+  }
+
+  $('#month').addEventListener('change', (e) => { if (e.target.value) setMonth(e.target.value); });
+  $('#month-prev').onclick = () => setMonth(monthList(state.month, 2)[0]);
+  $('#month-next').onclick = () => {
+    const [year, month] = state.month.split('-').map(Number);
+    const d = new Date(year, month, 1);
+    setMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+  };
+
   $('#filter-type').addEventListener('change', (e) => { state.type = e.target.value; state.page = 1; loadTransactions(); });
   $('#filter-category').addEventListener('change', (e) => { state.category = e.target.value; state.page = 1; loadTransactions(); });
   $('#prev').onclick = () => { state.page--; loadTransactions(); };
@@ -917,7 +959,7 @@
       openTxDialog(state.txById[edit]);
       return;
     }
-    if (!id || !confirm('Excluir esta transação?')) return;
+    if (!id || !confirm('Excluir este lançamento?')) return;
     try {
       await api('/transactions/' + id, { method: 'DELETE' });
       await loadAll();
@@ -979,10 +1021,7 @@
       });
       $('#tx-dialog').close();
       // Vai para o mês da transação salva, para ela aparecer na lista.
-      state.month = body.date.slice(0, 7);
-      state.page = 1;
-      $('#month').value = state.month;
-      await loadAll();
+      setMonth(body.date.slice(0, 7));
     } catch (err) {
       $('#tx-error').textContent = err.message;
     }
@@ -1123,12 +1162,12 @@
     $('#card-summary').innerHTML = `
       <div class="panel-head">
         <h2>${esc(card.name)}</h2>
-        <span class="actions">
+        <span class="acts">
           <button type="button" class="small" data-card-edit="1">Editar</button>
           <button type="button" class="small danger" data-card-del="1">Excluir</button>
         </span>
       </div>
-      <div class="limit-line"><span>Usado <strong>${money(card.used)}</strong></span><span>Limite <strong>${money(card.credit_limit)}</strong></span></div>
+      <div class="limit-line"><span>Usado <strong class="num">${money(card.used)}</strong></span><span>Limite <strong class="num">${money(card.credit_limit)}</strong></span></div>
       <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(Math.min(100, percent))}" aria-label="Limite usado">
         <span class="${status}-bg" style="width:${Math.min(100, percent).toFixed(1)}%"></span>
       </div>
@@ -1137,26 +1176,27 @@
 
   function renderInvoice(inv) {
     const items = inv.items.length
-      ? inv.items.map((i) => `<div class="tx">
+      ? inv.items.map((i) => `<div class="tx" style="grid-template-columns:3.4rem 1fr auto">
+          <span class="date num">${i.number}/${i.count}</span>
           <div class="info">
-            <div class="desc">${esc(i.description)} <span class="muted">(${i.number}/${i.count})</span></div>
+            <div class="desc">${esc(i.description)}</div>
             <div class="muted">${i.category ? esc(i.category) + ' · ' : ''}compra em ${fmtDate(i.purchase_date)}</div>
           </div>
-          <div class="amount">${i.status === 'paid'
-            ? `<span class="badge-paid">Paga</span>${money(i.paid_amount)}`
-            : money(i.amount)}</div>
+          <span class="amount num">${i.status === 'paid'
+            ? `<span class="stamp">paga</span>${money(i.paid_amount)}`
+            : money(i.amount)}</span>
         </div>`).join('')
       : '<div class="empty">Nenhuma parcela nesta fatura.</div>';
 
     const paid = Number(inv.paid_total) > 0
-      ? `<div class="muted">Já pago ou antecipado: ${money(inv.paid_total)}</div>` : '';
+      ? `<div class="muted">Já pago ou antecipado: <span class="num">${money(inv.paid_total)}</span></div>` : '';
 
     $('#invoice').innerHTML = `
       <div class="muted">Fecha em ${fmtDate(inv.closing_date)} · vence em ${fmtDate(inv.due_date)}</div>
-      <div class="big">${money(inv.total)}</div>
+      <div class="invoice-total">${money(inv.total)}</div>
       <div class="muted">em aberto</div>
       ${paid}
-      <div style="margin-top:10px">${items}</div>`;
+      <div style="margin-top:12px">${items}</div>`;
   }
 
   function renderPurchases() {
@@ -1174,15 +1214,15 @@
       const interest = Number(p.interest_rate) > 0
         ? `juros de ${Number(p.interest_rate).toFixed(2)}% ao mês (${money(p.interest_total)} no total)`
         : 'sem juros';
-      return `<div class="purchase">
-        <div class="cat-line"><strong>${esc(p.description)}</strong><span>${count}x de ${money(first.amount)}</span></div>
+      return `<div class="item purchase">
+        <div class="line"><strong>${esc(p.description)}</strong><span class="num">${count}x de ${money(first.amount)}</span></div>
         <div class="muted">${p.category ? esc(p.category.name) + ' · ' : ''}${fmtDate(p.purchase_date)} · ${money(p.total_with_interest)} · ${interest}</div>
         <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(pct)}" aria-label="Parcelas pagas">
           <span class="ok-bg" style="width:${pct.toFixed(1)}%"></span>
         </div>
-        <div class="cat-line">
+        <div class="line">
           <span class="muted">${paidCount} de ${count} pagas · restam ${money(p.remaining.amount)}</span>
-          <span class="actions">
+          <span class="acts">
             <button type="button" class="small" data-prepay="${p.id}" ${open ? '' : 'disabled'}>Antecipar</button>
             <button type="button" class="small danger" data-purchase-del="${p.id}">Excluir</button>
           </span>
@@ -1294,7 +1334,7 @@
   function renderSimulation(sim) {
     const hasInterest = Number(sim.interest_total) > 0;
     return `
-      <div class="sim-main">${sim.installments_count}x de <strong>${money(sim.installment_amount)}</strong></div>
+      <div class="sim-main">${sim.installments_count}x de <strong class="num">${money(sim.installment_amount)}</strong></div>
       <div class="muted">Total ${money(sim.total_with_interest)}${hasInterest
         ? ` · juros de ${money(sim.interest_total)} (${Number(sim.interest_rate).toFixed(2)}% ao mês)`
         : ' · sem juros'}</div>
@@ -1303,7 +1343,7 @@
       <details>
         <summary>Ver todas as parcelas</summary>
         <ul class="inst-list">${sim.installments.map((i) =>
-          `<li><span>${i.number}ª · vence ${fmtDate(i.due_date)}</span><strong>${money(i.amount)}</strong></li>`).join('')}</ul>
+          `<li><span>${i.number}ª · vence ${fmtDate(i.due_date)}</span><strong class="num">${money(i.amount)}</strong></li>`).join('')}</ul>
       </details>`;
   }
 
@@ -1391,7 +1431,7 @@
       <label class="pp-item">
         <input type="checkbox" data-n="${i.number}">
         <span>${i.number}ª · vence ${fmtDate(i.due_date)}</span>
-        <strong>${money(i.amount)}</strong>
+        <strong class="num">${money(i.amount)}</strong>
       </label>`).join('');
 
     $('#pp-quote').innerHTML = '<div class="muted">Marque as parcelas que deseja antecipar.</div>';
@@ -1414,9 +1454,9 @@
         <tbody>${rows}</tbody>
       </table>
       <div class="pp-totals">
-        <div><span>Valor das parcelas</span><span>${money(q.total_original)}</span></div>
-        <div><span>Total a pagar</span><strong>${money(q.total_to_pay)}</strong></div>
-        <div><span>Economia em juros</span><strong class="income">${money(q.total_savings)}</strong></div>
+        <div><span>Valor das parcelas</span><span class="num">${money(q.total_original)}</span></div>
+        <div><span>Total a pagar</span><strong class="num">${money(q.total_to_pay)}</strong></div>
+        <div><span>Economia em juros</span><strong class="num income">${money(q.total_savings)}</strong></div>
       </div>
       ${noInterest ? '<div class="muted" style="margin-top:8px">Esta compra não tem juros, então não há desconto, mas o limite do cartão é liberado.</div>' : ''}`;
   }
