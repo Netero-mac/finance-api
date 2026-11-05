@@ -46,11 +46,18 @@
   button:hover:not(:disabled) { background: color-mix(in srgb, var(--ink) 8%, transparent); }
   button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
   button.primary:hover:not(:disabled) { background: color-mix(in srgb, var(--accent) 88%, black); }
-  button.link, button.small { border: none; background: none; padding: 0 2px; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--rule); }
-  button.small { font-size: .85rem; }
-  button.link:hover:not(:disabled), button.small:hover:not(:disabled) { background: none; text-decoration-color: currentColor; }
-  button.danger { color: var(--expense); }
-  button.small.primary { background: var(--accent); color: var(--accent-ink); padding: 3px 10px; text-decoration: none; }
+  /* Botões de ação: contorno fino + sombra "carimbo" para parecerem clicáveis */
+  button.link, button.small { border: 1px solid var(--ink); background: var(--surface); color: var(--ink); padding: 5px 12px; border-radius: 2px; text-decoration: none; font-weight: 600; box-shadow: 2px 2px 0 var(--rule); transition: transform .08s, box-shadow .08s, background .12s, color .12s; }
+  button.small { font-size: .82rem; padding: 3px 9px; box-shadow: 1px 1px 0 var(--rule); }
+  #btn-new-budget::before, #btn-new-cat::before, #btn-new-purchase::before { content: "+ "; font-weight: 700; }
+  button.link:hover:not(:disabled), button.small:hover:not(:disabled) { background: var(--ink); color: var(--paper); }
+  button.link:active:not(:disabled), button.small:active:not(:disabled) { transform: translate(1px,1px); box-shadow: none; }
+  button.link:focus-visible, button.small:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  button.link:disabled, button.small:disabled { opacity: .5; cursor: not-allowed; box-shadow: none; }
+  button.danger { color: var(--expense); border-color: var(--expense); }
+  button.danger:hover:not(:disabled) { background: var(--expense) !important; color: var(--paper) !important; }
+  button.small.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); padding: 3px 10px; }
+  button.small.primary:hover:not(:disabled) { background: var(--ink); color: var(--paper); border-color: var(--ink); }
   button:disabled { opacity: .45; cursor: default; }
   button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   label { display: block; font-size: .78rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); margin: 14px 0 4px; }
