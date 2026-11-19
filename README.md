@@ -14,9 +14,15 @@ A demonstração roda no plano gratuito da Render: se ficar um tempo sem acessos
 
 ![Painel do Finance](docs/painel.png)
 
+*Painel mensal: avisos de orçamento, receitas, despesas e saldo com comparação ao mês anterior, gastos por categoria e evolução dos últimos seis meses.*
+
 ![Orçamentos e lançamentos](docs/orcamentos.png)
 
+*Orçamentos por categoria com barra de progresso e status (dentro do limite, alerta a partir de 80%, estourado), gastos por categoria e lista de lançamentos com filtros, edição e exclusão.*
+
 ![Cartão de crédito e compras parceladas](docs/cartoes.png)
+
+*Cartão de crédito: limite usado e disponível, fatura do mês, compras parceladas com progresso das parcelas e antecipação de parcelas com desconto.*
 
 ## Funcionalidades
 
