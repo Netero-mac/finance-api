@@ -2,7 +2,7 @@
 
 [![Tests](https://github.com/Netero-mac/finance-api/actions/workflows/ci.yml/badge.svg)](https://github.com/Netero-mac/finance-api/actions/workflows/ci.yml)
 
-API REST de controle financeiro pessoal feita com **Laravel**, com uma interface web simples para usá-la. Cada usuário cadastra suas categorias e transações (receitas e despesas), filtra por período e consulta um resumo mensal com saldo.
+API REST de controle financeiro pessoal feita com **Laravel**, com uma interface web para usá-la. Cada usuário cadastra categorias e transações, define **orçamentos por categoria com alertas**, controla **cartão de crédito com parcelamento, juros e antecipação de parcelas** e acompanha tudo num painel mensal.
 
 ## Demonstração
 
@@ -10,18 +10,37 @@ API REST de controle financeiro pessoal feita com **Laravel**, com uma interface
 
 Usuário de teste: `demo@finance.test` · senha: `demo12345`
 
-A demonstração roda no plano gratuito da Render: se ficar um tempo sem acessos, o primeiro carregamento pode levar cerca de 1 minuto. Os dados de exemplo são recriados a cada reinício do servidor.
+A demonstração roda no plano gratuito da Render: se ficar um tempo sem acessos, o primeiro carregamento pode levar cerca de 1 minuto. Os dados de exemplo (de janeiro até o mês atual) são recriados a cada reinício do servidor.
 
 ![Painel do Finance](docs/painel.png)
 
+![Orçamentos e lançamentos](docs/orcamentos.png)
+
+![Cartão de crédito e compras parceladas](docs/cartoes.png)
+
 ## Funcionalidades
 
+**Controle financeiro**
 - Cadastro, login e logout com token (Laravel Sanctum)
-- CRUD de categorias (receita ou despesa)
-- CRUD de transações com filtros por período, categoria e tipo, e paginação
-- Resumo mensal: total de receitas, despesas, saldo e total por categoria
+- CRUD de categorias (receita ou despesa) e de transações, com filtros por período, categoria e tipo, e paginação
+- Resumo mensal: receitas, despesas, saldo, total por categoria e comparação com o mês anterior
+- Gráficos em SVG: gastos por categoria e últimos seis meses
+
+**Orçamento por categoria**
+- Limite mensal por categoria de despesa
+- Status automático: dentro do limite, **alerta a partir de 80%** e **estourado** acima de 100%
+- Avisos em destaque no painel, com quanto resta ou quanto passou do limite
+
+**Cartão de crédito**
+- Cadastro de cartões com limite, dia de fechamento e dia de vencimento
+- Compras parceladas **sem juros** (centavos distribuídos sem perda) ou **com juros** (tabela Price)
+- Simulação do parcelamento antes de confirmar a compra
+- Fatura por mês, com limite usado e disponível
+- **Antecipação de parcelas** com desconto proporcional aos juros (valor presente), sem desconto se não houver juros ou se o pagamento for no vencimento ou depois; parcelas pagas liberam o limite
+- Os gastos do cartão entram no resumo e nos orçamentos por regime de caixa: a parcela conta no mês do vencimento, ou no mês do pagamento se foi antecipada
+
+**Qualidade**
 - Isolamento de dados: cada usuário só acessa os próprios registros (Policies)
-- Interface web em um único arquivo HTML (`public/app.html`), sem dependências externas
 - Testes automatizados rodando a cada push (GitHub Actions)
 - Deploy com Docker na Render
 
@@ -64,6 +83,8 @@ php artisan serve
 - API: `http://127.0.0.1:8000/api`
 - Usuário de exemplo criado pelo seed: `demo@finance.test` / `demo12345`
 
+> No Windows, evite caminhos com acentos (por exemplo `C:\Users\Usuário`): o `php artisan serve` falha. Use algo como `C:\dev\finance-api`.
+
 ## Testes
 
 ```bash
@@ -87,17 +108,21 @@ Accept: application/json
 | POST | `/api/login` | Login (limitado a 5 tentativas por minuto) | Não |
 | POST | `/api/logout` | Revoga o token atual | Sim |
 | GET | `/api/user` | Dados do usuário logado | Sim |
-| GET | `/api/categories` | Lista categorias (`?type=income` ou `expense`) | Sim |
-| POST | `/api/categories` | Cria categoria | Sim |
-| GET | `/api/categories/{id}` | Mostra categoria | Sim |
-| PUT | `/api/categories/{id}` | Edita categoria | Sim |
-| DELETE | `/api/categories/{id}` | Remove categoria (bloqueado se tiver transações) | Sim |
-| GET | `/api/transactions` | Lista transações com filtros e paginação | Sim |
-| POST | `/api/transactions` | Cria transação | Sim |
-| GET | `/api/transactions/{id}` | Mostra transação | Sim |
-| PUT | `/api/transactions/{id}` | Edita transação | Sim |
-| DELETE | `/api/transactions/{id}` | Remove transação | Sim |
-| GET | `/api/summary` | Resumo mensal (`?month=2026-10`) | Sim |
+| GET/POST | `/api/categories` | Lista (`?type=income` ou `expense`) e cria categorias | Sim |
+| PUT/DELETE | `/api/categories/{id}` | Edita e remove categoria (bloqueado se tiver transações) | Sim |
+| GET/POST | `/api/transactions` | Lista com filtros e paginação, e cria transação | Sim |
+| PUT/DELETE | `/api/transactions/{id}` | Edita e remove transação | Sim |
+| GET/POST | `/api/budgets` | Lista (com gasto, percentual e status) e cria orçamento | Sim |
+| PUT/DELETE | `/api/budgets/{id}` | Edita e remove orçamento | Sim |
+| GET/POST | `/api/cards` | Lista e cria cartões | Sim |
+| PUT/DELETE | `/api/cards/{id}` | Edita e remove cartão | Sim |
+| POST | `/api/cards/{id}/simulate` | Simula um parcelamento (com ou sem juros) | Sim |
+| GET | `/api/cards/{id}/invoice` | Fatura de um mês (`?month=2026-11`) | Sim |
+| GET/POST | `/api/cards/{id}/purchases` | Lista e registra compras parceladas | Sim |
+| GET/DELETE | `/api/purchases/{id}` | Mostra e remove uma compra | Sim |
+| POST | `/api/purchases/{id}/prepayments/simulate` | Simula a antecipação de parcelas | Sim |
+| POST | `/api/purchases/{id}/prepayments` | Antecipa parcelas | Sim |
+| GET | `/api/summary` | Resumo mensal (`?month=2026-11`), incluindo cartão | Sim |
 
 ### Filtros de transações
 
@@ -119,26 +144,6 @@ curl -X POST https://finance-api-o6mw.onrender.com/api/login \
   -d '{"email":"demo@finance.test","password":"demo12345"}'
 ```
 
-**Criar categoria**
-
-```bash
-curl -X POST http://127.0.0.1:8000/api/categories \
-  -H "Authorization: Bearer SEU_TOKEN" \
-  -H "Accept: application/json" -H "Content-Type: application/json" \
-  -d '{"name":"Alimentação","type":"expense"}'
-```
-
-```json
-{
-  "data": {
-    "id": 1,
-    "name": "Alimentação",
-    "type": "expense",
-    "created_at": "2026-10-15T19:00:00.000000Z"
-  }
-}
-```
-
 **Criar transação**
 
 ```bash
@@ -146,13 +151,6 @@ curl -X POST http://127.0.0.1:8000/api/transactions \
   -H "Authorization: Bearer SEU_TOKEN" \
   -H "Accept: application/json" -H "Content-Type: application/json" \
   -d '{"category_id":1,"description":"Almoço","amount":25.50,"type":"expense","date":"2026-10-01"}'
-```
-
-**Listar com filtros**
-
-```bash
-curl "http://127.0.0.1:8000/api/transactions?from=2026-10-01&to=2026-10-31&type=expense" \
-  -H "Authorization: Bearer SEU_TOKEN" -H "Accept: application/json"
 ```
 
 **Resumo mensal**
@@ -175,6 +173,8 @@ curl "http://127.0.0.1:8000/api/summary?month=2026-10" \
 }
 ```
 
+O resumo também devolve `card_expense` (parte das despesas que veio do cartão) e, por categoria, o valor `card`. Os nomes e formatos exatos dos campos de orçamentos e cartões estão nos testes em `tests/Feature`.
+
 ## Códigos de resposta
 
 | Código | Quando acontece |
@@ -189,27 +189,34 @@ curl "http://127.0.0.1:8000/api/summary?month=2026-10" \
 
 - **Form Requests** para validação e **API Resources** para padronizar o JSON de resposta.
 - **Policies** garantem que um usuário nunca vê nem altera dados de outro.
-- A categoria de uma transação precisa ser do próprio usuário, e o tipo da transação precisa ser igual ao da categoria.
-- Valores monetários usam `decimal(10,2)`, e o resumo soma em centavos (inteiros) para evitar erros de arredondamento.
-- `user_id` não é preenchido pela requisição: sempre vem do usuário autenticado.
-- O resumo usa consultas agregadas (`SUM` com `GROUP BY`) em vez de somar em PHP.
-- A interface é um único HTML servido pelo próprio Laravel, no mesmo endereço da API, o que dispensa configuração de CORS.
-- O token fica no `localStorage` do navegador, o que é suficiente para este projeto. Em produção, o ideal seria um cookie `HttpOnly`.
+- Valores monetários usam `decimal(10,2)`, e as somas e divisões são feitas em centavos (inteiros) para evitar erros de arredondamento. No parcelamento sem juros, os centavos que sobram são distribuídos entre as primeiras parcelas.
+- Parcelamento com juros usa a **tabela Price** (parcela fixa pela fórmula PMT).
+- Antecipação: o valor da parcela é trazido a valor presente, `parcela / (1 + i)^(dias/30)`. Sem juros, ou pagando no vencimento ou depois, não há desconto.
+- Orçamentos e resumo consideram o cartão por **regime de caixa**, em um serviço dedicado (`CardSpending`) usado pelos dois, para os números nunca divergirem.
+- Datas são comparadas com `whereDate`, para não perder registros do último dia do mês no SQLite.
+- `user_id` nunca vem da requisição: sempre do usuário autenticado.
+- A interface é um único HTML servido pelo próprio Laravel, no mesmo endereço da API, o que dispensa CORS.
+- O token fica no `localStorage`, suficiente para este projeto. Em produção, o ideal seria um cookie `HttpOnly`.
 
 ## Estrutura
 
 ```
 app/
-├── Enums/TransactionType.php
+├── Enums/
 ├── Http/
-│   ├── Controllers/Api/   Auth, Category, Transaction, Summary
+│   ├── Controllers/Api/   Auth, Category, Transaction, Budget, CreditCard,
+│   │                      CardPurchase, CardInvoice, CardPrepayment, Summary
 │   ├── Requests/          validação de entrada
 │   └── Resources/         formato das respostas
-├── Models/                User, Category, Transaction
-└── Policies/              regras de acesso
-database/seeders/          dados de demonstração
+├── Models/                User, Category, Transaction, Budget,
+│                          CreditCard, CardPurchase, CardInstallment
+├── Policies/              regras de acesso
+└── Services/              CardPurchasePlanner, EarlyPaymentCalculator, CardSpending
+database/seeders/          dados de demonstração (janeiro até o mês atual)
+docs/                      capturas de tela
 public/app.html            interface web
-tests/Feature/             Auth, Category, Transaction, Summary
+tests/Feature/             Auth, Category, Transaction, Summary, Budget,
+                           CreditCard, CardPurchase, Prepayment, CardIntegration
 Dockerfile                 imagem usada no deploy
 ```
 
