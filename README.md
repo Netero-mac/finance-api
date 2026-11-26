@@ -229,3 +229,7 @@ Dockerfile                 imagem usada no deploy
 ## Autor
 
 Feito por [Netero-mac](https://github.com/Netero-mac), estudante de Sistemas de Informação.
+
+## Licença
+
+Distribuído sob a licença MIT. Veja [LICENSE](LICENSE).
